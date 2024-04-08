@@ -4,6 +4,8 @@ pacman::p_load(shiny,shinydashboard,fresh,shinydashboardPlus,shinyjs,rmarkdown,f
 # setting up a temporary directory
 setwd(tempdir())
 
+options(encoding="UTF-8")
+Sys.setlocale(category = "LC_ALL", locale = "German")
 
 # writeLines for report with figures
 writeLines(
