@@ -1,0 +1,150 @@
+\documentclass[10pt,a4paper]{report}
+\setlength\parindent{0pt}
+
+\usepackage[margin=0.8in]{geometry}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+
+% =================== TITLE PAGE ===================
+\begin{center}
+\Huge\noindent\textbf{PeerReview Report}
+
+\vspace{0.5em}
+\Large{Fragenkatalog zur Fremdbewertung in der Laboratoriumsmedizin}
+
+\vspace{0.5em}
+\large{Bericht erstellt am: \Sexpr{format(Sys.Date(), "%d.%m.%Y")}}
+\end{center}
+\vspace{2em}
+
+% =================== Führung ===================
+\section*{Führung}
+
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Textantwort} \\
+\hline
+<<fremdbewertung_fuehrung, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_fremdbewertung.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "fuehrung")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+% =================== Mitarbeitende ===================
+\section*{Mitarbeitende}
+
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Textantwort} \\
+\hline
+<<fremdbewertung_mitarbeitende, echo=FALSE, results='asis'>>=
+responses <- subset(responses_all, Section == "mitarbeitende")
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+% =================== Patienten und Angehörige ===================
+\section*{Patienten und Angehörige}
+
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Textantwort} \\
+\hline
+<<fremdbewertung_pat, echo=FALSE, results='asis'>>=
+responses <- subset(responses_all, Section == "patienten")
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+% =================== Einsender & Kooperationspartner ===================
+\section*{Einsender \& Kooperationspartner}
+
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Textantwort} \\
+\hline
+<<fremdbewertung_ein, echo=FALSE, results='asis'>>=
+responses <- subset(responses_all, Section == "einsender")
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+% =================== Qualitätsindikatoren ===================
+\section*{Qualitätsindikatoren}
+
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Textantwort} \\
+\hline
+<<fremdbewertung_qual, echo=FALSE, results='asis'>>=
+responses <- subset(responses_all, Section == "qualitaet")
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\end{document}

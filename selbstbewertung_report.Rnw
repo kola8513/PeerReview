@@ -1,0 +1,213 @@
+\documentclass[10pt,a4paper]{report}
+\setlength\parindent{0pt}
+
+\usepackage[margin=0.8in]{geometry}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+
+% =================== TITLE PAGE ===================
+\begin{center}
+\Huge\noindent\textbf{Peer Review Bericht}
+
+\vspace{0.5em}
+\Large{Fragenkatalog zur Selbstbewertung in der Laboratoriumsmedizin}
+
+\vspace{0.5em}
+\large{Bericht erstellt am: \Sexpr{format(Sys.Date(), "%d.%m.%Y")}}
+\end{center}
+\vspace{2em}
+
+% =================== BERUFSGRUPPE ===================
+\section*{Berufsgruppe}
+\vspace{1em}
+\noindent\textbf{Berufsgruppe:} \Sexpr{input$Berufsgruppe}
+
+
+% =================== SECTIONAL PLOTS ===================
+% Führung
+\section*{Führung}
+
+\includegraphics[width=0.8\textwidth]{plot_fuehrung.png}
+
+\vspace{1em}
+% Führung Table (no "Nr." column)
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Numerische Antwort} & \textbf{Text Antwort} \\
+\hline
+<<fuehrung_response_table, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "fuehrung")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+\section*{Mitarbeitende}
+
+\includegraphics[width=0.8\textwidth]{plot_mit.png}
+
+% Mitarbeitende Table
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Antwort} & \textbf{Begründung/Details} \\
+\hline
+<<mitarbeitende_response_table, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "mitarbeitende")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+\newpage
+\section*{Patienten und Angehörige}
+
+\includegraphics[width=0.8\textwidth]{plot_pat.png}
+
+% Patienten und Angehörige Table
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Antwort} & \textbf{Begründung/Details} \\
+\hline
+<<patienten_response_table, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "patienten")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+
+\newpage
+\section*{Einsender \& Kooperationspartner}
+
+\includegraphics[width=0.8\textwidth]{plot_ein.png}
+
+% Einsender & Kooperationspartner Table
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Antwort} & \textbf{Begründung/Details} \\
+\hline
+<<einsender_response_table, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "einsender")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}
+\newpage
+\section*{Qualitätsindikatoren}
+
+\includegraphics[width=0.8\textwidth]{plot_qual.png}
+
+% Qualitätsindikatoren Table
+\begin{longtable}{|p{6.5cm}|p{2.1cm}|p{6.2cm}|}
+\hline
+\textbf{Frage} & \textbf{Antwort} & \textbf{Begründung/Details} \\
+\hline
+<<qualitaet_response_table, echo=FALSE, results='asis'>>=
+responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE)
+responses <- subset(responses_all, Section == "qualitaet")
+esc <- function(x) {
+  x <- ifelse(is.na(x), "", as.character(x))
+  x <- gsub("\\documentclass\\s*\\{[^}]*\\}", "", x, perl = TRUE)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("([#$%&_{}])", "\\\\\\1", x)
+  x <- gsub("~", "\\\\textasciitilde{}", x)
+  x <- gsub("\\^", "\\\\textasciicircum{}", x)
+  x <- gsub("S", "\\S", x)
+  x <- gsub("&", "\\&", x)
+  x
+}
+if (nrow(responses) > 0) {
+  for (i in 1:nrow(responses)) {
+    cat(paste0(
+      esc(responses$Frage[i]), " & ",
+      esc(ifelse(responses$Antwort[i] == "" | is.na(responses$Antwort[i]), "N/A", responses$Antwort[i])), " & ",
+      esc(responses$Begründung[i]), " \\\\ \\hline\n"))
+  }
+} else {
+  cat("\\multicolumn{3}{|c|}{Keine Antworten vorhanden.} \\\\ \\hline\n")
+}
+@
+\end{longtable}

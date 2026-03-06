@@ -1,0 +1,307 @@
+---
+title: "Peer Review Gesamtbericht"
+subtitle: "Zusammenfassung aller Selbstbewertungen"
+author: "`r params$project_title`"
+date: "`r format(Sys.Date(), '%d. %B %Y')`"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+    latex_engine: pdflatex
+geometry: margin=0.8in
+fontsize: 11pt
+documentclass: article
+params:
+  project_title: "Projekt"
+  project_id: NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 5,
+  fig.align = 'center'
+)
+
+library(knitr)
+
+# Load lab info
+if (file.exists("labinfo.csv")) {
+  labinfo <- read.csv("labinfo.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  labinfo <- data.frame()
+}
+
+# Load responses for each topic
+load_topic_responses <- function(filename) {
+  if (file.exists(filename)) {
+    read.csv(filename, stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+  } else {
+    data.frame(
+      Nutzer = character(0),
+      Frage = character(0),
+      Bewertung = character(0),
+      Begründung = character(0),
+      stringsAsFactors = FALSE
+    )
+  }
+}
+
+fuehrung_responses <- load_topic_responses("fuehrung_responses.csv")
+mitarbeitende_responses <- load_topic_responses("mitarbeitende_responses.csv")
+pat_responses <- load_topic_responses("pat_responses.csv")
+ein_responses <- load_topic_responses("ein_responses.csv")
+qual_responses <- load_topic_responses("qual_responses.csv")
+
+# Load statistics
+load_stats <- function(filename) {
+  if (file.exists(filename)) {
+    read.csv(filename, stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+  } else {
+    data.frame()
+  }
+}
+
+fuehrung_stats <- load_stats("fuehrung_stats.csv")
+mitarbeitende_stats <- load_stats("mitarbeitende_stats.csv")
+pat_stats <- load_stats("pat_stats.csv")
+ein_stats <- load_stats("ein_stats.csv")
+qual_stats <- load_stats("qual_stats.csv")
+
+# Table function for responses
+create_response_table <- function(responses_df) {
+  if (nrow(responses_df) > 0 && all(c("Nutzer", "Frage", "Bewertung", "Begründung") %in% names(responses_df))) {
+    kable(
+      responses_df[, c("Nutzer", "Frage", "Bewertung", "Begründung")],
+      col.names = c("Frage", "Numerische Antwort", "Text-Antwort"),
+      align = c("l", "l", "c", "l")
+    )
+  } else {
+    cat("\n*Keine Antworten vorhanden.*\n\n")
+  }
+}
+
+# Table function for statistics
+create_stats_table <- function(stats_df) {
+  if (nrow(stats_df) > 0) {
+    kable(
+      stats_df,
+      col.names = c("Frage", "Min", "Mittel", "Max"),
+      align = c("l", "c", "c", "c"),
+      digits = 2
+    )
+  } else {
+    cat("\n*Keine Statistiken vorhanden.*\n\n")
+  }
+}
+```
+
+---
+
+**Vertraulich – Nur für den internen Gebrauch**
+
+**Bericht erstellt am:** `r format(Sys.time(), '%d.%m.%Y um %H:%M Uhr')`
+
+---
+
+\newpage
+
+# Laborinformationen
+
+```{r labinfo, results='asis'}
+if (nrow(labinfo) > 0) {
+  cat("\n")
+  
+  # Basic info
+  if (!is.na(labinfo$lab_name) && labinfo$lab_name != "") {
+    cat("**Laborname:** ", labinfo$lab_name, "\n\n")
+  }
+  
+  # Address
+  address_parts <- c()
+  if (!is.na(labinfo$street) && labinfo$street != "") address_parts <- c(address_parts, labinfo$street)
+  if (!is.na(labinfo$plz) && labinfo$plz != "") address_parts <- c(address_parts, labinfo$plz)
+  if (!is.na(labinfo$city) && labinfo$city != "") address_parts <- c(address_parts, labinfo$city)
+  if (!is.na(labinfo$country) && labinfo$country != "") address_parts <- c(address_parts, labinfo$country)
+  
+  if (length(address_parts) > 0) {
+    cat("**Adresse:** ", paste(address_parts, collapse = ", "), "\n\n")
+  }
+  
+  # Contact
+  if (!is.na(labinfo$phone) && labinfo$phone != "") {
+    cat("**Telefon:** ", labinfo$phone, "\n\n")
+  }
+  if (!is.na(labinfo$email) && labinfo$email != "") {
+    cat("**Email:** ", labinfo$email, "\n\n")
+  }
+  if (!is.na(labinfo$website) && labinfo$website != "") {
+    cat("**Website:** ", labinfo$website, "\n\n")
+  }
+  
+  # Staff
+  if (!is.na(labinfo$lab_director) && labinfo$lab_director != "") {
+    cat("**Laborleiter:** ", labinfo$lab_director, "\n\n")
+  }
+  if (!is.na(labinfo$deputy) && labinfo$deputy != "") {
+    cat("**Stellvertreter:** ", labinfo$deputy, "\n\n")
+  }
+  
+  # Numbers
+  staff_info <- c()
+  if (!is.na(labinfo$num_employees) && labinfo$num_employees != "") {
+    staff_info <- c(staff_info, paste("Mitarbeiter:", labinfo$num_employees))
+  }
+  if (!is.na(labinfo$num_doctors) && labinfo$num_doctors != "") {
+    staff_info <- c(staff_info, paste("Ärzte:", labinfo$num_doctors))
+  }
+  if (!is.na(labinfo$num_mtl) && labinfo$num_mtl != "") {
+    staff_info <- c(staff_info, paste("MTL:", labinfo$num_mtl))
+  }
+  
+  if (length(staff_info) > 0) {
+    cat("**Personal:** ", paste(staff_info, collapse = " | "), "\n\n")
+  }
+  
+  # Certifications
+  if (!is.na(labinfo$accreditation) && labinfo$accreditation != "") {
+    cat("**Akkreditierung:** ", labinfo$accreditation, "\n\n")
+  }
+  if (!is.na(labinfo$certification) && labinfo$certification != "") {
+    cat("**Zertifizierung:** ", labinfo$certification, "\n\n")
+  }
+  
+} else {
+  cat("\n*Keine Laborinformationen verfügbar.*\n\n")
+}
+```
+
+\newpage
+
+# Selbstbewertung - Zusammenfassung
+
+## Führung
+
+### Radarplot
+
+```{r fuehrung-plot, echo=FALSE}
+if (file.exists("plot_fuehrung.png")) {
+  knitr::include_graphics("plot_fuehrung.png")
+}
+```
+
+### Statistik (Min, Mittel, Max)
+
+```{r fuehrung-stats, echo=FALSE}
+create_stats_table(fuehrung_stats)
+```
+
+### Detaillierte Antworten
+
+```{r fuehrung-responses, echo=FALSE}
+create_response_table(fuehrung_responses)
+```
+
+\newpage
+
+## Mitarbeitende
+
+### Radarplot
+
+```{r mit-plot, echo=FALSE}
+if (file.exists("plot_mit.png")) {
+  knitr::include_graphics("plot_mit.png")
+}
+```
+
+### Statistik (Min, Mittel, Max)
+
+```{r mit-stats, echo=FALSE}
+create_stats_table(mitarbeitende_stats)
+```
+
+### Detaillierte Antworten
+
+```{r mit-responses, echo=FALSE}
+create_response_table(mitarbeitende_responses)
+```
+
+\newpage
+
+## Patienten & Angehörige
+
+### Radarplot
+
+```{r pat-plot, echo=FALSE}
+if (file.exists("plot_pat.png")) {
+  knitr::include_graphics("plot_pat.png")
+}
+```
+
+### Statistik (Min, Mittel, Max)
+
+```{r pat-stats, echo=FALSE}
+create_stats_table(pat_stats)
+```
+
+### Detaillierte Antworten
+
+```{r pat-responses, echo=FALSE}
+create_response_table(pat_responses)
+```
+
+\newpage
+
+## Einsender & Kooperationspartner
+
+### Radarplot
+
+```{r ein-plot, echo=FALSE}
+if (file.exists("plot_ein.png")) {
+  knitr::include_graphics("plot_ein.png")
+}
+```
+
+### Statistik (Min, Mittel, Max)
+
+```{r ein-stats, echo=FALSE}
+create_stats_table(ein_stats)
+```
+
+### Detaillierte Antworten
+
+```{r ein-responses, echo=FALSE}
+create_response_table(ein_responses)
+```
+
+\newpage
+
+## Qualitätsindikatoren
+
+### Radarplot
+
+```{r qual-plot, echo=FALSE}
+if (file.exists("plot_qual.png")) {
+  knitr::include_graphics("plot_qual.png")
+}
+```
+
+### Statistik (Min, Mittel, Max)
+
+```{r qual-stats, echo=FALSE}
+create_stats_table(qual_stats)
+```
+
+### Detaillierte Antworten
+
+```{r qual-responses, echo=FALSE}
+create_response_table(qual_responses)
+```
+
+---

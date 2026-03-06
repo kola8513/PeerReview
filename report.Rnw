@@ -1,0 +1,126 @@
+
+\documentclass[10pt,a4paper]{report}
+\setlength\parindent{0pt}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\begin{document}
+\begin{center}
+{\LARGE \textbf{PeerReview}} \\[0.7em]
+Fragenkatalog zur Selbst‐ und Fremdbewertung in der Laboratoriumsmedizin \\[0.7em]
+Peer Review \\[0.7em]
+Oldenburg: Klinikum Oldenburg, Zentrum für Laboratoriumsdiagnostik, \\
+Universitätsinstitut für Klinische Chemie und Laboratoriumsmedizin
+\end{center}
+\vspace{2em}
+{\Large \textbf{Projekt:} \Sexpr{if (!is.null(input$project_title)) input$project_title else ""}}
+
+\section*{Grundlagen und Organisation}
+\begin{itemize}
+  \item \textit{Name und Anschrift der Einrichtung:} \Sexpr{input$name}
+  \item \textit{Internetadresse der Einrichtung:} \Sexpr{input$internetadresse}
+  \item \textit{Trägerschaft mit Erläuterung ob öffentlich oder privat:} \Sexpr{input$trag}
+  \item \textit{Zugehörigkeit zu einem Unternehmensverbund:} \Sexpr{input$zug}
+  \item \textit{Ansprechpartner mit Titel und Qualifikation:} \Sexpr{input$ansprechpartner}
+  \item \textit{Email-Adresse Ansprechpartner:} \Sexpr{input$email}
+  \item \textit{Telefonnummer Ansprechpartner:} \Sexpr{input$telefonnummer}
+  \item \textit{Öffnungzeiten des Labors:} \Sexpr{input$oeffnungzeiten}
+  \item \textit{Versorgung / Einsender:} \Sexpr{input$versorgung}
+  \item \textit{Laborbereiche:} \Sexpr{input$laborbereiche}
+  \item \textit{Leistungsspektrum / Methoden:} \Sexpr{input$leistungsspektrum}
+  \item \textit{Ausstattung:} \Sexpr{input$ausstattung}
+  \item \textit{Benennen Sie Ihre Hauptlieferanten:} \Sexpr{input$hauptlieferanten}
+  \item \textit{Werden Farbcodesysteme einheitlich genutzt:} \Sexpr{input$question_binary_1}
+  \item \textit{Welche Farbcodesysteme werden aktuell bei Probenröhrchen verwendet:} \Sexpr{input$farbcodesystem}
+  \item \textit{Nimmt Ihr Labor an Studien teil:} \Sexpr{input$question_binary_2}
+  \item \textit{Welche Verfahren zur Auftragsgenerierung bietet das Labor dem Einsender an:} \Sexpr{input$auftragsgenerierung}
+  \item \textit{Welche Hinweise zur Präanalytik stellt das Labor zur Verfügung?:} \Sexpr{input$praeanalytik}
+  \item \textit{Wie erfolgt die Befundübermittlung:} \Sexpr{input$befunduebermittlung}
+  \item \textit{Welche Service- und Beratungsleistungen erbringen Sie:} \Sexpr{input$beratungsleistungen}
+  \item \textit{Werden Hinweise zur DRG Gruppierung ausgegeben:} \Sexpr{input$question_binary_3}
+\end{itemize}
+
+\newpage
+\section*{Personal}
+\begin{itemize}
+  \item \textit{Anzahl Mitarbeitende (gesamt):} \Sexpr{input$anzahl_total}
+\end{itemize}
+\noindent\textbf{Ärztliches Personal}
+\begin{itemize}
+  \item \textit{Gesamt:} \Sexpr{input$anzahl_mit}
+  \item \textit{Fachärzte:} \Sexpr{input$davon_fachaerzte}
+  \item \textit{In Weiterbildung:} \Sexpr{input$davon_weiterbildung}
+  \item \textit{Planstellen:} \Sexpr{input$anzahl_planstellen}
+  \item \textit{Unbesetzt:} \Sexpr{input$davon_unbesetzt}
+\end{itemize}
+\noindent\textbf{Technisches Personal}
+\begin{itemize}
+  \item \textit{Gesamt:} \Sexpr{input$anzahl_tech}
+  \item \textit{Planstellen:} \Sexpr{input$anzahl_tplanstellen}
+  \item \textit{Unbesetzt:} \Sexpr{input$davon_tunbesetzt}
+\end{itemize}
+\noindent\textbf{Naturwissenschaftliches Personal}
+\begin{itemize}
+  \item \textit{Gesamt:} \Sexpr{input$anzahl_natur}
+  \item \textit{Planstellen:} \Sexpr{input$anzahl_nplanstellen}
+  \item \textit{Unbesetzt:} \Sexpr{input$davon_nunbesetzt}
+\end{itemize}
+\noindent\textbf{IT-Mitarbeitende}
+\begin{itemize}
+  \item \textit{Gesamt:} \Sexpr{input$anzahl_it}
+  \item \textit{Planstellen:} \Sexpr{input$anzahl_iplanstellen}
+  \item \textit{Unbesetzt:} \Sexpr{input$davon_iunbesetzt}
+\end{itemize}
+\noindent\textbf{Weitere Informationen}
+\begin{itemize}
+  \item \textit{Beschreibung der IT-Unterstützung:} \Sexpr{input$beschreibung_it}
+  \item \textit{Weitere Informationen zu Personal und Stellenbesetzungen:} \Sexpr{input$weitereinfo_personal}
+\end{itemize}
+
+\newpage
+\section*{EDV und Kennzahlen}
+\noindent\textbf{System Informationen}
+\begin{itemize}
+  \item \textit{Anbieter LIS:} \Sexpr{input$anbieterinfo}
+  \item \textit{Anbieter Order-Entry:} \Sexpr{input$anbieterorder}
+  \item \textit{Anbieter Middleware (alle):} \Sexpr{input$anbietermiddleware}
+  \item \textit{Weitere IT-Systeme:} \Sexpr{input$weitereit}
+  \item \textit{Öffnungs- und Betriebszeiten:} \Sexpr{input$angaben}
+\end{itemize}
+\noindent\textbf{Kennzahlen}
+\begin{itemize}
+  \item \textit{Laufendes Jahr:} \Sexpr{input$laufendenjahres}
+  \item \textit{Vorjahr:} \Sexpr{input$vorjahres}
+  \item \textit{Kompetenzschwerpunkte:} \Sexpr{input$kompetenzschwerpunkte}
+\end{itemize}
+\noindent\textbf{Dokumente und Ergänzungen}
+\begin{itemize}
+  \item \textit{Organigramm (Dateiname):} \Sexpr{input$organigramm_filename}
+  \item \textit{Ergänzung:} \Sexpr{input$ergaenzung}
+\end{itemize}
+
+\newpage
+\section*{Input durch Peer Review}
+\begin{itemize}
+  \item \textit{Beschreibungen:} \Sexpr{input$PeerReview_Beschreibungen}
+  \item \textit{Anmerkungen des Peers:} \Sexpr{input$PeerReview_Anmerkungen}
+\end{itemize}
+
+\section*{Berufsgruppe}
+\begin{itemize}
+  \item \textit{Berufsgruppe:} \Sexpr{input$Berufsgruppe}
+\end{itemize}
+
+\newpage
+% --- Persönliche Antworten ---
+
+\section*{Berufsgruppe}
+\vspace{1em}
+\begin{itemize}
+    \item \textit{Berufsgruppe:} \Sexpr{input$Berufsgruppe}
+\end{itemize}
+
+\newpage
+
+\end{document}

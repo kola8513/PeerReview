@@ -1,0 +1,67 @@
+\documentclass[10pt,a4paper]{report}
+\setlength\parindent{0pt}
+
+\usepackage[margin=0.8in]{geometry}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+
+\begin{document}
+
+% =================== TITLE PAGE ===================
+\begin{center}
+\Huge\noindent\textbf{PeerReview Zusammenfassung}
+
+\vspace{0.5em}
+\Large{Selbstbewertung \& Laborinformation}
+
+\vspace{0.5em}
+\large{Bericht erstellt am: \Sexpr{format(Sys.Date(), "%d.%m.%Y")}}
+\end{center}
+\vspace{2em}
+
+% =================== PROJECT INFO ===================
+\section*{Projekt}
+\vspace{1em}
+\noindent\textbf{Projektname:} \Sexpr{input$project_title}
+\vspace{1em}
+
+% =================== LABORINFORMATION ===================
+\section*{Laborinformation}
+\vspace{1em}
+\begin{longtable}{p{0.38\textwidth}p{0.58\textwidth}}
+\textbf{Name und Anschrift} & \Sexpr{input$name} \\
+\textbf{Internetadresse} & \Sexpr{input$internetadresse} \\
+\textbf{Trägerschaft} & \Sexpr{input$trag} \\
+\textbf{Zugehörigkeit zu Unternehmensverbund} & \Sexpr{input$zug} \\
+\textbf{Ansprechpartner} & \Sexpr{input$ansprechpartner} \\
+\textbf{Email Ansprechpartner} & \Sexpr{input$email} \\
+\textbf{Telefonnummer Ansprechpartner} & \Sexpr{input$telefonnummer} \\
+\textbf{Öffnungzeiten des Labors} & \Sexpr{input$oeffnungzeiten} \\
+\textbf{Versorgung / Einsender} & \Sexpr{input$versorgung} \\
+\textbf{Laborbereiche} & \Sexpr{input$laborbereiche} \\
+\textbf{Leistungsspektrum / Methoden} & \Sexpr{input$leistungsspektrum} \\
+\textbf{Ausstattung} & \Sexpr{input$ausstattung} \\
+\textbf{Hauptlieferanten} & \Sexpr{input$hauptlieferanten} \\
+\textbf{Farbcodesysteme genutzt} & \Sexpr{input$question_binary_1} \\
+\textbf{Welche Farbcodesysteme werden verwendet} & \Sexpr{input$farbcodesystem} \\
+\textbf{Labor nimmt an Studien teil} & \Sexpr{input$question_binary_2} \\
+\textbf{Verfahren zur Auftragsgenerierung} & \Sexpr{input$auftragsgenerierung} \\
+\textbf{Hinweise zur Präanalytik} & \Sexpr{input$praeanalytik} \\
+\textbf{Befundübermittlung} & \Sexpr{input$befunduebermittlung} \\
+\textbf{Beratungsleistungen} & \Sexpr{input$beratungsleistungen} \\
+\textbf{Hinweise zur DRG Gruppierung ausgegeben} & \Sexpr{input$question_binary_3} \\
+\textbf{Organigramm-Dateiname} & \Sexpr{input$organigramm_filename} \\
+\textbf{Ergänzung} & \Sexpr{input$ergaenzung} \\
+\end{longtable}
+
+% =================== SELBSTBEWERTUNG ZUSAMMENFASSUNG ===================
+\section*{Zusammenfassung der Selbstbewertung}
+\vspace{1em}
+
+\input{fuehrung_table.tex}
+\input{mitarbeitende_table.tex}
+
+\end{document}

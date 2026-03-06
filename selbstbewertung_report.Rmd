@@ -1,0 +1,155 @@
+---
+title: "Peer Review Bericht"
+subtitle: "Fragenkatalog zur Selbst- und Fremdbewertung in der Laboratoriumsmedizin"
+author: "`r paste('Berufsgruppe:', params$berufsgruppe)`"
+date: "`r format(Sys.Date(), '%d. %B %Y')`"
+
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+params:
+  berufsgruppe: "Nicht angegeben"
+  alleine_oder_gruppe: "Nicht angegeben"
+  gruppen_groesse: "1" 
+geometry: margin=0.8in
+fontsize: 11pt
+documentclass: article
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 5,
+  fig.align = 'center'
+)
+
+library(knitr)
+
+# Load responses
+if (file.exists("user_responses.csv")) {
+  responses_all <- read.csv("user_responses.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  responses_all <- data.frame(
+    Section = character(0),
+    Frage = character(0),
+    Antwort = character(0),
+    Begründung = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Table function
+create_modern_table <- function(section_name) {
+  responses <- subset(responses_all, Section == section_name)
+  
+  if (nrow(responses) > 0 && all(c("Frage", "Antwort", "Begründung") %in% names(responses))) {
+    kable(
+      responses[, c("Frage", "Antwort", "Begründung")],
+      col.names = c("Frage", "Numerische Antwort", "Text-Antwort"),  
+      align = c("l", "c", "l")
+    )
+  } else {
+    cat("\n*Keine Antworten für diesen Bereich vorhanden.*\n\n")
+  }
+}
+```
+
+
+---
+
+
+**Vertraulich – Nur für den internen Gebrauch**
+
+**Einwilligungserklärung:**
+
+*Ich bestätige, dass ich über Zweck, Funktionen, Umfang der Datenverarbeitung, Zugriffs- und Rechtemanagement, den Datenschutz sowie das Widerrufsrecht der App-Nutzung informiert wurde, akzeptiere die Bedingungen und willige der Nutzung ein.*
+
+**Berufsgruppe:** `r params$berufsgruppe`
+
+**Füllen Sie den Fragebogen alleine oder in einer Gruppe aus?** `r params$alleine_oder_gruppe`
+
+**Anzahl Personen:** `r if(params$alleine_oder_gruppe == "gruppe") params$gruppen_groesse else "1 (Einzelperson)"`
+
+
+---
+
+## Führung
+
+```{r, echo=FALSE}
+
+if (file.exists("plot_fuehrung.png")) {
+  knitr::include_graphics("plot_fuehrung.png")
+}
+
+# Antworten
+
+create_modern_table("fuehrung")
+
+```
+
+\newpage
+
+## Mitarbeitende
+
+```{r, echo=FALSE}
+
+if (file.exists("plot_mit.png")) {
+  knitr::include_graphics("plot_mit.png")
+}
+
+# Antworten
+
+create_modern_table("mitarbeitende")
+
+```
+
+\newpage
+
+## Patient und Angehörige
+
+```{r, echo=FALSE}
+
+if (file.exists("plot_pat.png")) {
+  knitr::include_graphics("plot_pat.png")
+}
+
+create_modern_table("patienten")
+
+```
+
+\newpage
+
+## Einsender und Koorperationspartner
+
+```{r, echo=FALSE}
+
+if(file.exists("plot_ein.png")){
+  knitr::include_graphics("plot_ein.png")
+}
+
+create_modern_table("einsender")
+
+```
+
+\newpage
+
+## Qualitätsindikatoren und Technische und Medizinische Validation
+
+```{r, echo=FALSE}
+if(file.exists("plot_qual.png")){
+  knitr::include_graphics("plot_qual.png")
+}
+
+create_modern_table("qualitaet")
+
+```
+
+

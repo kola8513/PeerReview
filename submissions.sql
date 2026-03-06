@@ -1,0 +1,6 @@
+CREATE TABLE submissions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    submitted_at TIMESTAMP DEFAULT NOW()
+);
