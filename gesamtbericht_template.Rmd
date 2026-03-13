@@ -1,0 +1,189 @@
+---
+title: "Peer Review Gesamtbericht"
+subtitle: "Vollständiger Bericht mit Selbstbewertung und Fremdbewertungen"
+author: "Leading Peer"
+date: "`r format(Sys.Date(), '%d. %B %Y')`"
+
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    df_print: kable
+    fig_caption: true
+geometry: margin=0.8in
+fontsize: 10pt
+documentclass: article
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 5,
+  fig.align = 'center'
+)
+
+library(knitr)
+
+# Load lab info
+if (file.exists("labinfo.csv")) {
+  labinfo <- read.csv("labinfo.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  labinfo <- data.frame()
+}
+
+# Load Selbstbewertung data
+if (file.exists("selbst_statistics.csv")) {
+  selbst_stats <- read.csv("selbst_statistics.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_stats <- data.frame()
+}
+
+if (file.exists("selbst_groups.csv")) {
+  selbst_groups <- read.csv("selbst_groups.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_groups <- data.frame()
+}
+
+if (file.exists("selbst_texts.csv")) {
+  selbst_texts <- read.csv("selbst_texts.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_texts <- data.frame()
+}
+
+# Load Fremdbewertung data
+if (file.exists("fremd_all.csv")) {
+  fremd_all <- read.csv("fremd_all.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  fremd_all <- data.frame()
+}
+
+# Load report metadata
+if (file.exists("report_meta.csv")) {
+  report_meta <- read.csv("report_meta.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  report_meta <- data.frame(teilnehmende = "", ort = "", datum = "")
+}
+
+# Load SWOT data
+if (file.exists("swot_data.csv")) {
+  swot_data <- read.csv("swot_data.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  swot_data <- data.frame(strengths = "", weaknesses = "", opportunities = "", threats = "")
+}
+
+# Load co-peers
+if (file.exists("co_peers.csv")) {
+  co_peers <- read.csv("co_peers.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  co_peers <- data.frame()
+}
+
+# Load text files
+if (file.exists("best_practices.txt")) {
+  best_practices <- readLines("best_practices.txt", warn = FALSE)
+  best_practices <- paste(best_practices, collapse = "\n")
+} else {
+  best_practices <- ""
+}
+
+if (file.exists("final_remarks.txt")) {
+  final_remarks <- readLines("final_remarks.txt", warn = FALSE)
+  final_remarks <- paste(final_remarks, collapse = "\n")
+} else {
+  final_remarks <- ""
+}
+
+# Table 1: Statistics
+create_statistics_table <- function(section_name) {
+  stats <- subset(selbst_stats, Section == section_name)
+  
+  if (nrow(stats) > 0 && all(c("Frage", "Statistik") %in% names(stats))) {
+    output <- data.frame(
+      Nr = 1:nrow(stats),
+      Frage = stats$Frage,
+      Statistik = stats$Statistik,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Selbstbewertung - Verteilung"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Statistik vorhanden.*\n\n")
+  }
+}
+
+# Table 2: Group averages
+create_groups_table <- function(section_name) {
+  groups <- subset(selbst_groups, Section == section_name)
+  
+  if (nrow(groups) > 0 && all(c("Frage", "Berufsgruppen") %in% names(groups))) {
+    output <- data.frame(
+      Nr = 1:nrow(groups),
+      Frage = groups$Frage,
+      Berufsgruppen = groups$Berufsgruppen,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Durchschnitt nach Berufsgruppe"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Berufsgruppen-Daten vorhanden.*\n\n")
+  }
+}
+
+# Table 3: Text responses
+create_text_table <- function(section_name) {
+  texts <- subset(selbst_texts, Section == section_name)
+  
+  if (nrow(texts) > 0 && all(c("Frage", "Textantworten") %in% names(texts))) {
+    output <- data.frame(
+      Nr = 1:nrow(texts),
+      Frage = texts$Frage,
+      Textantworten = texts$Textantworten,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Selbstbewertung - Textantworten"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Textantworten vorhanden.*\n\n")
+  }
+}
+
+# Table 4: Fremdbewertung (with reviewer info)
+create_fremd_table <- function(section_name) {
+  fremd <- subset(fremd_all, Section == section_name)
+  
+  if (nrow(fremd) > 0 && all(c("Frage", "Antwort", "Begründung", "Reviewer") %in% names(fremd))) {
+    output <- data.frame(
+      Nr = 1:nrow(fremd),
+      Frage = fremd$Frage,
+      Fremdbewertung = fremd$Antwort,
+      Kommentar = fremd$Begründung,
+      Reviewer = fremd$Reviewer,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Fremdbewertung", "Kommentar", "Reviewer"),
+      align = c("c", "l", "c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Fremdbewertung vorhanden.*\n\n")
+  }
+}

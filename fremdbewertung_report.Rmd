@@ -1,0 +1,332 @@
+---
+title: "Peer Review Bericht - Fremdbewertung"
+subtitle: "Vergleich: Selbstbewertung vs. Fremdbewertung"
+date: "`r format(Sys.Date(), '%d. %B %Y')`"
+
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+geometry: margin=0.8in
+fontsize: 10pt
+documentclass: article
+header-includes:
+  - \usepackage{longtable}
+  - \usepackage{booktabs}
+  - \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE, 
+  fig.width = 7, 
+  fig.height = 5,
+  fig.align = 'center'
+)
+
+library(knitr)
+
+# Load Fremdbewertung responses
+if (file.exists("user_fremdbewertung.csv")) {
+  fremd_all <- read.csv("user_fremdbewertung.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  fremd_all <- data.frame(
+    Section = character(0),
+    Frage = character(0),
+    Antwort = character(0),
+    Begründung = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Load Selbstbewertung statistics
+if (file.exists("selbst_statistics.csv")) {
+  selbst_stats <- read.csv("selbst_statistics.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_stats <- data.frame(
+    Section = character(0),
+    Frage = character(0),
+    Statistik = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Load Selbstbewertung group averages
+if (file.exists("selbst_groups.csv")) {
+  selbst_groups <- read.csv("selbst_groups.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_groups <- data.frame(
+    Section = character(0),
+    Frage = character(0),
+    Berufsgruppen = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Load Selbstbewertung text responses
+if (file.exists("selbst_texts.csv")) {
+  selbst_texts <- read.csv("selbst_texts.csv", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+} else {
+  selbst_texts <- data.frame(
+    Section = character(0),
+    Frage = character(0),
+    Textantworten = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+
+# Table 1: Statistics
+create_statistics_table <- function(section_name) {
+  stats <- subset(selbst_stats, Section == section_name)
+  
+  if (nrow(stats) > 0 && all(c("Frage", "Statistik") %in% names(stats))) {
+    output <- data.frame(
+      Nr = 1:nrow(stats),
+      Frage = stats$Frage,
+      Statistik = stats$Statistik,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Selbstbewertung - Verteilung"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Statistik vorhanden.*\n\n")
+  }
+}
+
+# Table 2: Group averages
+create_groups_table <- function(section_name) {
+  groups <- subset(selbst_groups, Section == section_name)
+  
+  if (nrow(groups) > 0 && all(c("Frage", "Berufsgruppen") %in% names(groups))) {
+    output <- data.frame(
+      Nr = 1:nrow(groups),
+      Frage = groups$Frage,
+      Berufsgruppen = groups$Berufsgruppen,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Durchschnitt nach Berufsgruppe"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Berufsgruppen-Daten vorhanden.*\n\n")
+  }
+}
+
+# Table 3: Text responses
+create_text_table <- function(section_name) {
+  texts <- subset(selbst_texts, Section == section_name)
+  
+  if (nrow(texts) > 0 && all(c("Frage", "Textantworten") %in% names(texts))) {
+    output <- data.frame(
+      Nr = 1:nrow(texts),
+      Frage = texts$Frage,
+      Textantworten = texts$Textantworten,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Selbstbewertung - Textantworten"),
+      align = c("c", "l", "l")
+    )
+  } else {
+    cat("\n*Keine Textantworten vorhanden.*\n\n")
+  }
+}
+
+# Table 4: Fremdbewertung
+create_fremd_table <- function(section_name) {
+  fremd <- subset(fremd_all, Section == section_name)
+  
+  if (nrow(fremd) > 0 && all(c("Frage", "Antwort", "Begründung") %in% names(fremd))) {
+    output <- data.frame(
+      Nr = 1:nrow(fremd),
+      Frage = fremd$Frage,
+      Fremdbewertung = fremd$Antwort,
+      Kommentar = fremd$Begründung,
+      stringsAsFactors = FALSE
+    )
+    
+    kable(
+      output,
+      col.names = c("Nr.", "Frage", "Fremdbewertung", "Kommentar"),
+      align = c("c", "l", "c", "l")
+    )
+  } else {
+    cat("\n*Keine Fremdbewertung vorhanden.*\n\n")
+  }
+}
+
+```
+
+
+\newpage
+
+## Führung
+
+### Selbstbewertung - Statistik
+
+```{r}
+create_statistics_table("fuehrung")
+```
+
+\newpage
+
+## Selbstbewertung - Durchschnitt nach Berufsgruppe
+
+```{r}
+create_groups_table("fuehrung")
+```
+
+\newpage
+
+## Selbstbewertung - Textantworten
+
+```{r}
+create_text_table("fuehrung")
+```
+
+\newpage
+
+## Fremdbewertung (Ihre Bewertung)
+
+```{r}
+create_fremd_table("fuehrung")
+
+```
+
+\newpage
+
+## Mitarbeitende
+
+## Selbstbewertung - Statistik
+
+```{r}
+create_statistics_table("mitarbeitende")
+```
+
+\newpage
+## Selbstbewertung - Durchschnitt nach Berufsgruppe
+
+```{r}
+create_groups_table("mitarbeitende")
+```
+\newpage
+
+## Selbstbewertung - Textantworten
+
+```{r}
+create_text_table("mitarbeitende")
+```
+\newpage
+
+## Fremdbewertung (Ihre Bewertung)
+
+```{r}
+create_fremd_table("mitarbeitende")
+```
+\newpage
+
+## Patient und Angehörige
+
+## Selbstbewertung - Statistik
+
+```{r}
+create_statistics_table("patienten")
+```
+
+\newpage
+## Selbstbewertung - Durchschnitt nach Berufsgruppe
+
+```{r}
+create_groups_table("patienten")
+```
+\newpage
+
+## Selbstbewertung - Textantworten
+
+```{r}
+create_text_table("patienten")
+```
+\newpage
+
+## Fremdbewertung (Ihre Bewertung)
+
+```{r}
+create_fremd_table("patienten")
+```
+
+\newpage
+
+## Einsender und Kooperationspartner
+
+## Selbstbewertung - Statistik
+
+```{r}
+create_statistics_table("einsender")
+```
+
+\newpage
+## Selbstbewertung - Durchschnitt nach Berufsgruppe
+
+```{r}
+create_groups_table("einsender")
+```
+\newpage
+
+## Selbstbewertung - Textantworten
+
+```{r}
+create_text_table("einsender")
+```
+\newpage
+
+## Fremdbewertung (Ihre Bewertung)
+
+```{r}
+create_fremd_table("einsender")
+```
+
+\newpage
+
+## Qualitätsindikatoren und Technische und Medizinische Validation
+
+## Selbstbewertung - Statistik
+
+```{r}
+create_statistics_table("qualitaet")
+```
+
+\newpage
+## Selbstbewertung - Durchschnitt nach Berufsgruppe
+
+```{r}
+create_groups_table("qualitaet")
+```
+\newpage
+
+## Selbstbewertung - Textantworten
+
+```{r}
+create_text_table("qualitaet")
+```
+\newpage
+
+## Fremdbewertung (Ihre Bewertung)
+
+```{r}
+create_fremd_table("qualitaet")
+```

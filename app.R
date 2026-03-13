@@ -22,6 +22,7 @@ library(fmsb)
 library(htmlwidgets)
 library(ggradar)
 library(fmsb)
+library(reshape2)
 
 
 py_require(
@@ -944,8 +945,7 @@ ui <- dashboardPage(
               "btnGoToInviteUsers",
               "Leading Peer einladen",
               icon = icon("arrow-right"),
-              style = "background-color: #003B73; color: white; border: none; padding: 10px 20px; font-weight: 500;"
-              
+              style = "background-color: #003B73 !important; color: white !important; border: none !important; padding: 10px 20px !important; font-weight: 500 !important;"
             )
           ),
         )
@@ -1728,11 +1728,35 @@ tabItem(
     box(
       title = tags$span("Peer Review Bericht herunterladen", style = "color:white;"),
       width = 6,
-      status = "success",
+      status = "primary",  # ✅ Changed from "success" to "primary" (blue)
       solidHeader = TRUE,
       uiOutput("report_project_selector_leading_ui"),
-      downloadButton("downloadFremdbewertung", "Meine Fremdbewertung herunterladen"),
-      downloadButton("downloadLeadingPeerGesamtbericht", "Gesamten Bericht herunterladen")
+      
+      # ✅ Updated button styling
+      tags$div(
+        style = "margin-top: 15px; margin-bottom: 10px;",
+        downloadButton(
+          "downloadFremdbewertung", 
+          "Meine Fremdbewertung herunterladen",
+          icon = icon("file-pdf"),
+          style = "background-color: #003B73; color: white; font-weight: bold; padding: 10px 20px; border: none; border-radius: 4px;"
+        )
+      ),
+      
+      tags$div(
+        style = "margin-top: 10px; margin-bottom: 15px;",
+        downloadButton(
+          "downloadLeadingPeerGesamtbericht", 
+          "Gesamten Bericht herunterladen",
+          icon = icon("file-pdf"),
+          style = "background-color: #003B73; color: white; font-weight: bold; padding: 10px 20px; border: none; border-radius: 4px;"
+        )
+      ),
+      
+      tags$p(
+        style = "margin-top: 10px; color: #666; font-size: 13px; font-style: italic;",
+        icon("info-circle"), " Bitte wählen Sie zuerst ein Projekt aus der Dropdown-Liste aus."
+      )
     )
   )
 ),
@@ -1785,14 +1809,13 @@ tabItem(
       icon = icon("file-signature"),
       HTML("Selbstbewertung ausfüllen (Fragebogen)."),
       tags$br(),
-      tags$button(
-        id = "goColleagueQuestionnaire",
-        class = "btn action-button",
-        style = "background-color: #00a65a !important; color: white !important; border: none !important; font-weight: 500; padding: 10px 20px;",
-        icon("arrow-right"),
-        " Zum Fragebogen"
+      actionButton(
+        inputId = "questionnaire",
+        label = " Zum Fragebogen",
+        icon = icon("arrow-right"),
+        style = "background-color: #00a65a !important; color: white !important; border: none !important; font-weight: 500; padding: 10px 20px;"
       )
-    ),
+    )
     # box(
     #   title = tags$span("4. Berichte herunterladen", style = "color:white;"),
     #   status = "warning",
@@ -1828,12 +1851,11 @@ tabItem(
         icon("flask"),
         " Labordaten ansehen"
       ),
-      tags$button(
-        id = "goColleagueQuestionnaire2",
-        class = "btn action-button",
-        style = "background-color: #00a65a !important; color: white !important; border: none !important; font-weight: 500; padding: 10px 20px; margin-right: 10px;",
-        icon("file-signature"),
-        " Fragebogen ausfüllen"
+      actionButton(
+        inputId = "questionnaire",
+        label = " Fragebogen ausfüllen",
+        icon = icon("file-signature"),
+        style = "background-color: #00a65a !important; color: white !important; border: none !important; font-weight: 500; padding: 10px 20px; margin-right: 10px;"
       )
       # tags$button(
       #   id = "goColleagueReports2",
@@ -1881,6 +1903,95 @@ tabItem(
     .dashboard-col-question { font-size: 13px; line-height: 1.4; color: #212529; }
     .dashboard-col-question strong { color: #003B73; font-size: 13px; }
     
+        
+             /* ✅ Enhanced statistics table styling */
+    .berufsgruppe-stats {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #e0e0e0;
+      margin-top: 16px;
+    }
+    
+    .berufsgruppe-stats h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .stats-detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+      font-size: 12px;
+    }
+    
+    .stats-detail-table thead {
+      background: #003B73;
+      color: white;
+    }
+    
+    .stats-detail-table th {
+      padding: 8px 6px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #00508f;
+    }
+    
+    .stats-detail-table td {
+      padding: 6px 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .stats-label {
+      text-align: left;
+      color: #555;
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 140px;
+    }
+    
+    .stats-n {
+      text-align: center;
+      color: #1976D2;
+      font-weight: 500;
+      min-width: 40px;
+    }
+    
+    .stats-question-value {
+      text-align: center;
+      font-size: 11px;
+      color: #555;
+      min-width: 45px;
+    }
+    
+    .stats-topic-avg {
+      text-align: center;
+      color: #1976D2;
+      font-weight: 600;
+      font-size: 13px;
+      background: #f0f7ff;
+      min-width: 60px;
+    }
+    
+    .stats-total td {
+      border-top: 2px solid #1976D2;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-weight: 600;
+      background: #fafafa;
+    }
+    
+    /* Responsive: Make table scrollable on small screens */
+    @media (max-width: 1200px) {
+      .berufsgruppe-stats {
+        overflow-x: auto;
+      }
+    }
+              
     /* Selbstbewertung styling - same as fragebogen_ui */
     .rating-inline { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
     .rating-active { background: #003B73; color: white; font-weight: 600; padding: 4px 7px; border-radius: 4px; font-size: 11px; display: inline-block; min-width: 28px; text-align: center; position: relative; }
@@ -2074,29 +2185,70 @@ tabItem(
 #----------------------------- co-peer dashboard-------------------------------
 
 tabItem(
-  tabName = "fill_questionnaire",
-  h2("Selbstbewertung ausfüllen"),
-  uiOutput("selbstbewertung_summary"),
-  uiOutput("questionnaire_ui"),
+  tabName = "co_peer_dashboard",
+  h2("Selbstbewertung Übersicht"),
   
+  # Project Selector
   fluidRow(
-    column(
+    box(
+      title = tags$span("Peer Review Auswahl", style = "color:white;"),
+      status = "primary",
+      solidHeader = TRUE,
       width = 12,
-      div(
-        style = "display:flex; justify-content:flex-start; gap:12px; margin: 20px 0;",
-        uiOutput("save_button_ui"),            
-        uiOutput("question_next_nav_ui_inline")
+      uiOutput("labor_leiter_summary_project_selector_ui")
+    )
+  ),
+  
+  # Custom CSS for consistent look (reuse or reference leading_peer_dashboard styling)
+  tags$head(tags$style(HTML("
+    /* Copy custom dashboard styling from leading_peer_dashboard here */
+  "))),
+  
+  # Main Content - Tabs
+  fluidRow(
+    tabBox(
+      width = 12,
+      id = "co_peer_dashboard_tabs",
+      
+      # FÜHRUNG TAB
+      tabPanel(
+        "Führung",
+        uiOutput("co_peer_dashboard_fuehrung")
+      ),
+      
+      # MITARBEITENDE TAB
+      tabPanel(
+        "Mitarbeitende",
+        uiOutput("co_peer_dashboard_mitarbeitende")
+      ),
+      
+      # PATIENTEN TAB
+      tabPanel(
+        "Patienten & Angehörige",
+        uiOutput("co_peer_dashboard_patienten")
+      ),
+      
+      # EINSENDER TAB
+      tabPanel(
+        "Einsender & Kooperationspartner",
+        uiOutput("co_peer_dashboard_einsender")
+      ),
+      
+      # QUALITÄT TAB
+      tabPanel(
+        "Qualitätsindikatoren & Validierung",
+        uiOutput("co_peer_dashboard_qualitaet")
       )
     )
   )
-  ),
+),
 
 
 # show this only for leading_peer and co_peer
 tabItem(
   tabName = "fill_fragebogen",
   h2("Fremdbewertung ausfüllen"),
-  uiOutput("selbstbewertung_summary"),  # For leading_peer: show comparison, otherwise empty
+  #uiOutput("selbstbewertung_summary"),  # For leading_peer: show comparison, otherwise empty
   uiOutput("fragebogen_ui"),
   fluidRow(
     column(
@@ -2173,6 +2325,206 @@ tabItem(
         shinyjs::disable("downloadZusammenfassung")
       }
     })
+    
+
+    #--------------Helper: Get Question-Level Statistics for PDF-------------------
+    
+    get_question_level_statistics <- function(project_id, questions_list, section_name) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      qids <- sapply(questions_list, function(q) q$id)
+      qids_quoted <- paste0("'", qids, "'", collapse = ", ")
+      
+      query <- sprintf("
+    SELECT 
+      r.question_id,
+      r.response_value as rating,
+      SUM(COALESCE(CAST(qd.answers::json->>'group_size' AS INTEGER), 1)) as count
+    FROM responses r
+    JOIN users u ON u.id = r.user_id
+    LEFT JOIN questionnaire_drafts qd 
+      ON u.id::text = qd.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id::text = '%s'
+      AND r.assessment_type = 'selbstbewertung'
+      AND r.question_id IN (%s)
+      AND r.response_value != ''
+      AND r.response_value != 'N/A'
+    GROUP BY r.question_id, r.response_value
+    ORDER BY r.question_id, r.response_value
+  ", as.character(project_id), qids_quoted)
+      
+      result <- DBI::dbGetQuery(con, query)
+      
+      # Create full data with question labels
+      full_data <- data.frame(
+        Section = section_name,
+        question_id = qids,
+        Frage = sapply(questions_list, function(q) q$label),
+        stringsAsFactors = FALSE
+      )
+      
+      # Format statistics as readable text
+      if (nrow(result) > 0) {
+        stats_by_question <- split(result, result$question_id)
+        
+        full_data$Statistik <- sapply(full_data$question_id, function(qid) {
+          stats <- stats_by_question[[qid]]
+          if (!is.null(stats) && nrow(stats) > 0) {
+            parts <- sapply(1:nrow(stats), function(i) {
+              # ✅ FIX: Use %.0f instead of %d
+              sprintf("Bewertung %s: %.0f Personen", stats$rating[i], as.numeric(stats$count[i]))
+            })
+            paste(parts, collapse = ", ")
+          } else {
+            "—"
+          }
+        })
+      } else {
+        full_data$Statistik <- "—"
+      }
+      
+      return(full_data[, c("Section", "question_id", "Frage", "Statistik")])
+    }
+    
+    #--------------Helper: Get Berufsgruppe Averages for PDF----------------------
+    
+    get_berufsgruppe_averages <- function(project_id, questions_list, section_name) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      qids <- sapply(questions_list, function(q) q$id)
+      qids_quoted <- paste0("'", qids, "'", collapse = ", ")
+      
+      query <- sprintf("
+    SELECT 
+      r.question_id,
+      COALESCE(qd.answers::json->>'Berufsgruppe', 'Nicht angegeben') as berufsgruppe,
+      ROUND(
+        SUM(CAST(r.response_value AS NUMERIC) * COALESCE(CAST(qd.answers::json->>'group_size' AS INTEGER), 1)) / 
+        SUM(COALESCE(CAST(qd.answers::json->>'group_size' AS INTEGER), 1)),
+        1
+      ) as avg_rating,
+      SUM(COALESCE(CAST(qd.answers::json->>'group_size' AS INTEGER), 1)) as group_count
+    FROM responses r
+    JOIN users u ON u.id = r.user_id
+    LEFT JOIN questionnaire_drafts qd 
+      ON u.id::text = qd.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id::text = '%s'
+      AND r.assessment_type = 'selbstbewertung'
+      AND r.question_id IN (%s)
+      AND r.response_value != ''
+      AND r.response_value != 'N/A'
+      AND r.response_value ~ '^[0-9]+$'
+    GROUP BY r.question_id, COALESCE(qd.answers::json->>'Berufsgruppe', 'Nicht angegeben')
+    ORDER BY r.question_id, berufsgruppe
+  ", as.character(project_id), qids_quoted)
+      
+      result <- DBI::dbGetQuery(con, query)
+      
+      # Create full data
+      full_data <- data.frame(
+        Section = section_name,
+        question_id = qids,
+        Frage = sapply(questions_list, function(q) q$label),
+        stringsAsFactors = FALSE
+      )
+      
+      # Format group averages
+      if (nrow(result) > 0) {
+        groups_by_question <- split(result, result$question_id)
+        
+        full_data$Berufsgruppen <- sapply(full_data$question_id, function(qid) {
+          groups <- groups_by_question[[qid]]
+          if (!is.null(groups) && nrow(groups) > 0) {
+            parts <- sapply(1:nrow(groups), function(i) {
+              # ✅ FIX: Use %.0f instead of %d
+              sprintf("%s: Ø %.1f (n=%.0f)", groups$berufsgruppe[i], as.numeric(groups$avg_rating[i]), as.numeric(groups$group_count[i]))
+            })
+            paste(parts, collapse = "; ")
+          } else {
+            "—"
+          }
+        })
+      } else {
+        full_data$Berufsgruppen <- "—"
+      }
+      
+      return(full_data[, c("Section", "question_id", "Frage", "Berufsgruppen")])
+    }
+    
+    
+    #--------------Helper: Get Selbstbewertung Text Responses for PDF--------------
+    
+    get_selbstbewertung_text_responses <- function(project_id, questions_list, section_name) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      qids <- sapply(questions_list, function(q) q$id)
+      qids_quoted <- paste0("'", qids, "'", collapse = ", ")
+      
+      query <- sprintf("
+    SELECT 
+      r.question_id,
+      r.text_value,
+      COALESCE(CAST(qd.answers::json->>'group_size' AS INTEGER), 1) as group_size
+    FROM responses r
+    JOIN users u ON u.id = r.user_id
+    LEFT JOIN questionnaire_drafts qd 
+      ON u.id::text = qd.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id::text = '%s'
+      AND r.assessment_type = 'selbstbewertung'
+      AND r.question_id IN (%s)
+      AND r.text_value != ''
+      AND r.text_value IS NOT NULL
+    ORDER BY r.question_id, r.text_value
+  ", as.character(project_id), qids_quoted)
+      
+      result <- DBI::dbGetQuery(con, query)
+      
+      # Create full data with question labels
+      full_data <- data.frame(
+        Section = section_name,
+        question_id = qids,
+        Frage = sapply(questions_list, function(q) q$label),
+        stringsAsFactors = FALSE
+      )
+      
+      # Aggregate texts by question (with count)
+      if (nrow(result) > 0) {
+        texts_by_question <- split(result, result$question_id)
+        
+        full_data$Textantworten <- sapply(full_data$question_id, function(qid) {
+          texts <- texts_by_question[[qid]]
+          if (!is.null(texts) && nrow(texts) > 0) {
+            # Aggregate identical texts
+            text_agg <- aggregate(group_size ~ text_value, data = texts, FUN = sum)
+            
+            parts <- sapply(1:nrow(text_agg), function(i) {
+              count <- as.numeric(text_agg$group_size[i])
+              if (count > 1) {
+                sprintf("• %s (×%.0f)", text_agg$text_value[i], count)
+              } else {
+                sprintf("• %s", text_agg$text_value[i])
+              }
+            })
+            paste(parts, collapse = ";")
+          } else {
+            "—"
+          }
+        })
+      } else {
+        full_data$Textantworten <- "—"
+      }
+      
+      return(full_data[, c("Section", "question_id", "Frage", "Textantworten")])
+    }
     
 #-------------------------- SPIDER PLOTS - All Topics----------------------------
 
@@ -3162,8 +3514,202 @@ tabItem(
     
     #--------------LEADING PEER DASHBOARD - CONTENT GENERATION------------------
 
-    # Helper function to create table rows
-    create_dashboard_rows <- function(df, questions_list, stats_list, plot_output_id) {
+    # Helper to calculate WEIGHTED stats
+    calc_weighted_stats <- function(df, questions_list, project_id) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      stats <- list()
+      
+      for (q in questions_list) {
+        qid <- q$id
+        
+        # Get responses WITH group_size from questionnaire_drafts
+        query <- "
+      SELECT 
+        r.response_value,
+        CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+      FROM responses r
+      JOIN users u ON u.id = r.user_id
+      LEFT JOIN questionnaire_drafts qd 
+        ON u.id::text = qd.user_id::text 
+        AND qd.project_id = r.project_id
+        AND qd.questionnaire_id = 'peer_review'
+      WHERE r.project_id = $1 
+        AND r.assessment_type = 'selbstbewertung'
+        AND r.question_id = $2
+        AND r.response_value != '' 
+        AND r.response_value != 'N/A'
+    "
+        
+        values_df <- DBI::dbGetQuery(con, query, params = list(project_id, qid))
+        
+        if (nrow(values_df) > 0) {
+          # Convert to numeric
+          values_df$response_numeric <- as.numeric(values_df$response_value)
+          values_df <- values_df[!is.na(values_df$response_numeric), ]
+          
+          # Default group_size to 1 if missing
+          values_df$group_size[is.na(values_df$group_size)] <- 1
+          
+          if (nrow(values_df) > 0) {
+            # Calculate weighted mean
+            weighted_sum <- sum(values_df$response_numeric * values_df$group_size)
+            total_people <- sum(values_df$group_size)
+            weighted_mean <- weighted_sum / total_people
+            
+            stats[[qid]] <- list(
+              mean = weighted_mean,
+              n = total_people,
+              n_users = nrow(values_df)
+            )
+          }
+        }
+      }
+      
+      return(stats)
+    }
+    
+    
+    #-------------------Create Berufsgruppe Statistics Table--------------------
+
+    #============================================================================
+    # Create Complete Berufsgruppe Statistics Table (Per-Question + Average)
+    #============================================================================
+    #============================================================================
+    # Create Complete Berufsgruppe Statistics Table (Per-Question + Average)
+    #============================================================================
+    create_berufsgruppe_stats_table_complete <- function(project_id, questions_list) {
+      # Get the weighted data (same as radar plot uses)
+      data <- get_berufsgruppe_radar_data_weighted(project_id, questions_list, integer())
+      
+      # 🔍 DEBUG
+      cat("\n=== STATS TABLE DATA DEBUG ===\n")
+      print("Data used for statistics table:")
+      print(data)
+      cat("===\n\n")
+      
+      if (is.null(data) || nrow(data) == 0) {
+        return(NULL)
+      }
+      
+      # Get breakdown for participant counts
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
+      
+      # Separate Berufsgruppe column
+      berufsgruppen <- data$berufsgruppe
+      numeric_data <- data[, -1, drop = FALSE]
+      
+      # 🔍 DEBUG: Show calculated averages
+      topic_averages <- rowMeans(numeric_data, na.rm = TRUE)
+      cat("\n=== TOPIC AVERAGES DEBUG ===\n")
+      for (i in 1:length(berufsgruppen)) {
+        cat(berufsgruppen[i], ": ", sprintf("%.2f", topic_averages[i]), "\n")
+      }
+      cat("===\n\n")
+      
+      # Extract question numbers
+      question_numbers <- sapply(questions_list, function(q) as.character(q$number))
+      
+      # Create table header
+      header_row <- tags$tr(
+        tags$th(rowspan = 2, "Berufsgruppe"),
+        tags$th(rowspan = 2, "n"),
+        tags$th(colspan = length(question_numbers), style = "text-align: center; border-bottom: 1px solid #00508f;", 
+                "Durchschnitt pro Frage"),
+        tags$th(rowspan = 2, HTML("Ø Thema<br/>(x&#772;<sub>w</sub>)"))
+      )
+      
+      # Question number sub-header
+      question_header_row <- tags$tr(
+        lapply(question_numbers, function(qnum) {
+          tags$th(style = "text-align: center; font-size: 11px; padding: 4px 6px;", qnum)
+        })
+      )
+      
+      # Create data rows
+      data_rows <- lapply(1:length(berufsgruppen), function(i) {
+        bg <- berufsgruppen[i]
+        
+        # Get n_people from breakdown
+        n_people <- if (nrow(berufsgruppe_breakdown) > 0) {
+          idx <- which(berufsgruppe_breakdown$berufsgruppe == bg)
+          if (length(idx) > 0) berufsgruppe_breakdown$n_people[idx] else 0
+        } else {
+          0
+        }
+        
+        tags$tr(
+          tags$td(class = "stats-label", bg),
+          tags$td(class = "stats-n", style = "text-align: center; color: #1976D2; font-weight: 500;", n_people),
+          lapply(1:ncol(numeric_data), function(j) {
+            val <- numeric_data[i, j]
+            tags$td(
+              class = "stats-question-value",
+              style = "text-align: center; font-size: 12px; color: #555;",
+              if (!is.na(val)) sprintf("%.2f", val) else "—"
+            )
+          }),
+          tags$td(
+            class = "stats-topic-avg",
+            style = "text-align: center; color: #1976D2; font-weight: 600; font-size: 13px; background: #f0f7ff;",
+            sprintf("%.2f", topic_averages[i])
+          )
+        )
+      })
+      
+      # Overall totals row
+      total_people <- sum(berufsgruppe_breakdown$n_people, na.rm = TRUE)
+      overall_topic_avg <- mean(topic_averages, na.rm = TRUE)
+      
+      # Calculate overall average per question
+      overall_question_avgs <- colMeans(numeric_data, na.rm = TRUE)
+      
+      total_row <- tags$tr(
+        class = "stats-total",
+        tags$td(tags$strong("Gesamt")),
+        tags$td(style = "text-align: center; font-weight: 600;", tags$strong(total_people)),
+        lapply(overall_question_avgs, function(val) {
+          tags$td(
+            style = "text-align: center; font-size: 12px; font-weight: 600;",
+            if (!is.na(val)) sprintf("%.2f", val) else "—"
+          )
+        }),
+        tags$td(
+          style = "text-align: center; font-weight: 600; background: #e3f2fd;",
+          tags$strong(sprintf("%.2f", overall_topic_avg))
+        )
+      )
+      
+      # Create complete table
+      tags$div(
+        class = "berufsgruppe-stats",
+        tags$h4("Statistik nach Berufsgruppe"),
+        tags$div(
+          style = "overflow-x: auto;",
+          tags$table(
+            class = "stats-detail-table",
+            tags$thead(
+              header_row,
+              question_header_row
+            ),
+            tags$tbody(
+              data_rows,
+              total_row
+            )
+          )
+        )
+      )
+    }
+    
+    # Helper to get Berufsgruppe breakdown
+   
+    #============================================================================
+    # Create Dashboard Rows with Weighted Statistics
+    #============================================================================
+    create_dashboard_rows <- function(df, questions_list, stats_list, plot_output_id, berufsgruppe_breakdown, project_id) {
+      # ✅ Added project_id parameter ^
+      
       question_rows <- lapply(seq_along(questions_list), function(idx) {
         q <- questions_list[[idx]]
         qid <- q$id
@@ -3171,15 +3717,45 @@ tabItem(
         
         selb_rows <- df[df$question_id == qid & df$response_value != "", ]
         
-        # Selbstbewertung display (same as fragebogen_ui)
+        # 🔍 DEBUG - Add this
+        if (qid == "F1") {
+          cat("\n=== DASHBOARD DEBUG F1 ===\n")
+          print("Columns in selb_rows:")
+          print(colnames(selb_rows))
+          print("Data:")
+          print(selb_rows[, c("response_value", "group_size")])
+        }
+        
         selb_display <- if (nrow(selb_rows) > 0) {
-          rating_counts <- table(selb_rows$response_value)
+          
+          # Check group_size exists
+          if (!"group_size" %in% colnames(selb_rows)) {
+            cat("ERROR: group_size missing in dashboard for", qid, "\n")
+            selb_rows$group_size <- 1
+          }
+          selb_rows$group_size[is.na(selb_rows$group_size)] <- 1
+          
+          total_people <- sum(selb_rows$group_size, na.rm = TRUE)
+          
+          # Calculate weighted ratings
+          rating_weighted <- aggregate(group_size ~ response_value, data = selb_rows, FUN = sum)
+          rating_counts_weighted <- setNames(rating_weighted$group_size, rating_weighted$response_value)
+          
+          # 🔍 DEBUG for F1
+          if (qid == "F1") {
+            cat("rating_weighted:\n")
+            print(rating_weighted)
+            cat("rating_counts_weighted:\n")
+            print(rating_counts_weighted)
+          }
           
           rating_display <- tags$div(
             class = "rating-inline",
             lapply(c("N/A", "1", "2", "3", "4", "5"), function(j) {
-              count <- as.integer(rating_counts[j])
-              if (!is.na(count) && count > 0) {
+              count <- rating_counts_weighted[as.character(j)]
+              count <- if (is.na(count)) 0 else as.integer(count)
+              
+              if (count > 0) {
                 if (count == 1) {
                   tags$span(class = "rating-active", j)
                 } else {
@@ -3195,29 +3771,30 @@ tabItem(
             })
           )
           
-          total_respondents <- nrow(selb_rows)
-          respondent_info <- if (total_respondents > 1) {
+          respondent_info <- if (total_people > 1) {
             tags$div(
               class = "respondent-info",
               icon("users"),
-              paste0(" ", total_respondents, " Teilnehmer")
+              paste0(" ", total_people, " Teilnehmer")
             )
           } else {
             NULL
           }
           
-          texts <- selb_rows$text_value[selb_rows$text_value != "" & !is.na(selb_rows$text_value)]
-          text_display <- if (length(texts) > 0) {
-            text_counts <- table(texts)
-            unique_texts <- names(text_counts)
+          texts_with_group <- selb_rows[selb_rows$text_value != "" & !is.na(selb_rows$text_value), 
+                                        c("text_value", "group_size")]
+          
+          text_display <- if (nrow(texts_with_group) > 0) {
+            text_weighted <- aggregate(group_size ~ text_value, data = texts_with_group, FUN = sum)
             
             tags$div(
               class = "selbst-text-container",
-              lapply(unique_texts, function(txt) {
-                count <- as.integer(text_counts[txt])
+              lapply(1:nrow(text_weighted), function(i) {
+                txt <- text_weighted$text_value[i]
+                count <- text_weighted$group_size[i]
                 tags$div(
                   class = "selbst-text-item",
-                  icon("comment-o"),
+                  icon("comment"),
                   txt,
                   tags$span(class = "text-count-badge", paste0("\u00d7", count))
                 )
@@ -3232,34 +3809,84 @@ tabItem(
           tags$span(class = "no-data", "\u2014")
         }
         
-        # Stats for this question
+        # Stats with weighted average
         stat_info <- if (qid %in% names(stats_list)) {
           stat <- stats_list[[qid]]
           tags$div(
-            tags$div(class = "stat-item",
-                     tags$span(class = "stat-label", "Ø: "),
-                     tags$span(class = "stat-value", sprintf("%.1f", stat$mean))),
-            tags$div(class = "stat-item",
-                     tags$span(class = "stat-label", "n: "),
-                     tags$span(class = "stat-value", stat$n))
+            class = "stats-container",
+            tags$div(
+              class = "stat-item stat-weighted",
+              tags$span(class = "stat-label", HTML("x&#772;<sub>w</sub>: ")),
+              tags$span(class = "stat-value", sprintf("%.2f", stat$mean))
+            ),
+            tags$div(
+              class = "stat-item",
+              tags$span(class = "stat-label", "n: "),
+              tags$span(class = "stat-value", stat$n)
+            )
           )
         } else {
           tags$span(class = "no-data", "\u2014")
         }
         
-        # First row includes plot with rowspan
+        # First row includes plot AND both tables
         if (idx == 1) {
+          
+          # Participant breakdown table (left side)
+          # breakdown_table <- if (nrow(berufsgruppe_breakdown) > 0) {
+          #   total_people <- sum(berufsgruppe_breakdown$n_people, na.rm = TRUE)
+          #   
+          #   tags$div(
+          #     class = "berufsgruppe-breakdown",
+          #     tags$h4("Teilnehmer nach Berufsgruppe"),
+          #     tags$table(
+          #       class = "breakdown-table",
+          #       tags$tbody(
+          #         lapply(1:nrow(berufsgruppe_breakdown), function(i) {
+          #           row <- berufsgruppe_breakdown[i, ]
+          #           tags$tr(
+          #             tags$td(class = "breakdown-label", row$berufsgruppe),
+          #             tags$td(class = "breakdown-value", 
+          #                     paste0("n = ", row$n_people))
+          #           )
+          #         }),
+          #         tags$tr(
+          #           class = "breakdown-total",
+          #           tags$td(class = "breakdown-label", tags$strong("Gesamt")),
+          #           tags$td(class = "breakdown-value", tags$strong(paste0("n = ", total_people)))
+          #         )
+          #       )
+          #     )
+          #   )
+          # } else {
+          #   NULL
+          #}
+          
+          # ✅ Statistics table (right side) - now project_id is available
+          stats_table <- create_berufsgruppe_stats_table_complete(project_id, questions_list)
+          
+          # Container with both tables side by side
+          tables_container <- tags$div(
+            class = "berufsgruppe-tables-container",
+            #breakdown_table,
+            stats_table
+          )
+          
           tags$tr(
             class = "dashboard-row",
             tags$td(class = "dashboard-col-question",
                     tags$strong(paste0(q_num, ". ")), q$label),
             tags$td(class = "dashboard-col-selbst", selb_display),
             tags$td(class = "dashboard-col-stats", stat_info),
-            tags$td(class = "dashboard-col-plot",
-                    rowspan = length(questions_list),
-                    plotOutput(plot_output_id, height = "600px"))
+            tags$td(
+              class = "dashboard-col-plot",
+              rowspan = length(questions_list),
+              tables_container,
+              plotOutput(plot_output_id, height = "600px")
+            )
           )
         } else {
+          # Other rows (not first)
           tags$tr(
             class = "dashboard-row",
             tags$td(class = "dashboard-col-question",
@@ -3273,27 +3900,8 @@ tabItem(
       do.call(tagList, question_rows)
     }
     
-    # Helper to calculate stats
-    calc_stats <- function(df, questions_list) {
-      stats <- list()
-      for (q in questions_list) {
-        qid <- q$id
-        values <- df[df$question_id == qid & df$response_value != "" & df$response_value != "N/A", ]$response_value
-        if (length(values) > 0) {
-          numeric_values <- as.numeric(values)
-          numeric_values <- numeric_values[!is.na(numeric_values)]
-          if (length(numeric_values) > 0) {
-            stats[[qid]] <- list(
-              mean = mean(numeric_values),
-              n = length(numeric_values)
-            )
-          }
-        }
-      }
-      stats
-    }
     
-    # FÜHRUNG TAB
+    # 1. FÜHRUNG TAB
     output$leading_peer_dashboard_fuehrung <- renderUI({
       req(current_project_id())
       project_id <- current_project_id()
@@ -3301,16 +3909,37 @@ tabItem(
       con <- get_db_con()
       on.exit(DBI::dbDisconnect(con))
       
+      # ✅ UPDATED QUERY (includes group_size):
       fuehrung_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'F%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'F%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
-      fuehrung_stats <- calc_stats(fuehrung_df, fuehrung_questions)
+      
+      fuehrung_stats <- calc_weighted_stats(fuehrung_df, fuehrung_questions, project_id)
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
+      
+      
+      # 🔍 DEBUG: Check if breakdown has data
+      cat("\n=== FÜHRUNG BERUFSGRUPPE BREAKDOWN ===\n")
+      print(berufsgruppe_breakdown)
+      print(paste("Number of rows:", nrow(berufsgruppe_breakdown)))
+      cat("===\n")
       
       tags$div(
         class = "dashboard-wrapper",
@@ -3325,13 +3954,20 @@ tabItem(
             )
           ),
           tags$tbody(
-            create_dashboard_rows(fuehrung_df, fuehrung_questions, fuehrung_stats, "overlay_radar_fuehrung_leading")
+            create_dashboard_rows(
+              fuehrung_df, 
+              fuehrung_questions, 
+              fuehrung_stats, 
+              "overlay_radar_fuehrung_leading",
+              berufsgruppe_breakdown,
+              project_id
+            )
           )
         )
       )
     })
     
-    # MITARBEITENDE TAB
+    # 2. MITARBEITENDE TAB
     output$leading_peer_dashboard_mitarbeitende <- renderUI({
       req(current_project_id())
       project_id <- current_project_id()
@@ -3340,15 +3976,29 @@ tabItem(
       on.exit(DBI::dbDisconnect(con))
       
       mit_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'M%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'M%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
-      mit_stats <- calc_stats(mit_df, mit_questions)
+      
+      
+      mit_stats <- calc_weighted_stats(mit_df, mit_questions, project_id)
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
       
       tags$div(
         class = "dashboard-wrapper",
@@ -3363,13 +4013,20 @@ tabItem(
             )
           ),
           tags$tbody(
-            create_dashboard_rows(mit_df, mit_questions, mit_stats, "overlay_radar_mitarbeitende_leading")
+            create_dashboard_rows(
+              mit_df, 
+              mit_questions, 
+              mit_stats, 
+              "overlay_radar_mitarbeitende_leading",
+              berufsgruppe_breakdown,
+              project_id
+            )
           )
         )
       )
     })
     
-    # PATIENTEN TAB
+    # 3. PATIENTEN TAB
     output$leading_peer_dashboard_patienten <- renderUI({
       req(current_project_id())
       project_id <- current_project_id()
@@ -3378,15 +4035,27 @@ tabItem(
       on.exit(DBI::dbDisconnect(con))
       
       pat_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'P%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'P%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
-      pat_stats <- calc_stats(pat_df, pat_questions)
+      pat_stats <- calc_weighted_stats(pat_df, pat_questions, project_id)
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
       
       tags$div(
         class = "dashboard-wrapper",
@@ -3401,13 +4070,20 @@ tabItem(
             )
           ),
           tags$tbody(
-            create_dashboard_rows(pat_df, pat_questions, pat_stats, "overlay_radar_patienten_leading")
+            create_dashboard_rows(
+              pat_df, 
+              pat_questions, 
+              pat_stats, 
+              "overlay_radar_patienten_leading",
+              berufsgruppe_breakdown,
+              project_id
+            )
           )
         )
       )
     })
     
-    # EINSENDER TAB
+    # 4. EINSENDER TAB
     output$leading_peer_dashboard_einsender <- renderUI({
       req(current_project_id())
       project_id <- current_project_id()
@@ -3416,15 +4092,27 @@ tabItem(
       on.exit(DBI::dbDisconnect(con))
       
       ein_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'E%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'E%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
-      ein_stats <- calc_stats(ein_df, ein_questions)
+      ein_stats <- calc_weighted_stats(ein_df, ein_questions, project_id)
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
       
       tags$div(
         class = "dashboard-wrapper",
@@ -3439,13 +4127,21 @@ tabItem(
             )
           ),
           tags$tbody(
-            create_dashboard_rows(ein_df, ein_questions, ein_stats, "overlay_radar_einsender_leading")
+            create_dashboard_rows(
+              ein_df, 
+              ein_questions, 
+              ein_stats, 
+              "overlay_radar_einsender_leading",
+              berufsgruppe_breakdown,
+              project_id
+            )
           )
         )
       )
     })
     
-    # QUALITÄT TAB
+    # 5. QUALITÄT TAB
+    
     output$leading_peer_dashboard_qualitaet <- renderUI({
       req(current_project_id())
       project_id <- current_project_id()
@@ -3454,15 +4150,27 @@ tabItem(
       on.exit(DBI::dbDisconnect(con))
       
       qual_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'Q%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'Q%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
-      qual_stats <- calc_stats(qual_df, qual_questions)
+      qual_stats <- calc_weighted_stats(qual_df, qual_questions, project_id)
+      berufsgruppe_breakdown <- get_berufsgruppe_breakdown(project_id)
       
       tags$div(
         class = "dashboard-wrapper",
@@ -3477,7 +4185,14 @@ tabItem(
             )
           ),
           tags$tbody(
-            create_dashboard_rows(qual_df, qual_questions, qual_stats, "overlay_radar_qualitaet_leading")
+            create_dashboard_rows(
+              qual_df, 
+              qual_questions, 
+              qual_stats, 
+              "overlay_radar_qualitaet_leading",
+              berufsgruppe_breakdown,
+              project_id
+            )
           )
         )
       )
@@ -3779,7 +4494,7 @@ tabItem(
     observeEvent(input$goColleagueLabData2, {
       updateTabItems(session, "sidebar_menu", selected = "labordaten_ansehen")
     })
-    observeEvent(input$goColleagueQuestionnaire2, {
+    observeEvent(input$questionnaire, {
       updateTabItems(session, "sidebar_menu", selected = "fill_questionnaire")
     })
     observeEvent(input$goColleagueReports2, {
@@ -4199,7 +4914,8 @@ tabItem(
           id = "sidebar_menu",
           menuItem("Co-Peer Dashboard", tabName = "co_peer_dashboard", icon = icon("dashboard")),
           menuItem("Labordaten ansehen", tabName = "labordaten_ansehen", icon = icon("flask")),
-          menuItem("Fragebogen ausfüllen", tabName = "fill_fragebogen", icon = icon("file-alt")),
+          menuItem("Fremdbewertung ausfüllen", tabName = "fill_fragebogen", icon = icon("file-alt")),
+          # Optionally: Remove if Co-Peer shouldn't download reports
           menuItem("Berichte herunterladen", tabName = "report", icon = icon("chart-line"))
         )
         return(menu)
@@ -6201,156 +6917,185 @@ tabItem(
     
     #--------------Statistics Function-------------------------------------------
     
-    get_topic_weighted_stats <- function(project_id, topic_key) {
-      question_list <- questionnaires[[topic_key]]
-      if (is.null(question_list)) return(data.frame())
-      question_ids <- sapply(question_list, function(q) q$id)
+    get_topic_weighted_stats <- function(project_id, topic_name) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
       
-      # ✅ Get expanded responses (each group response counted N times)
-      expanded <- expand_responses_by_group(project_id, question_ids)
+      # Map topic names to question prefixes
+      topic_prefix <- switch(topic_name,
+                             "fuehrung" = "F",
+                             "mitarbeitende" = "M",
+                             "patienten" = "P",
+                             "einsender" = "E",
+                             "qualitaet" = "Q",
+                             NULL
+      )
       
-      if (nrow(expanded) == 0) {
+      if (is.null(topic_prefix)) {
+        return(data.frame(Statistik = "Fehler", Wert = "Unbekanntes Thema"))
+      }
+      
+      # ✅ Count users AND sum group_size
+      result <- DBI::dbGetQuery(con, "
+    WITH user_stats AS (
+      SELECT 
+        r.user_id,
+        MAX(COALESCE(r.group_size, 1)) as group_size,
+        AVG(CAST(r.response_value AS NUMERIC)) as user_avg
+      FROM responses r
+      WHERE r.project_id = $1
+        AND r.question_id LIKE $2
+        AND r.response_value ~ '^[0-9]+$'
+        AND r.assessment_type = 'selbstbewertung'
+      GROUP BY r.user_id
+    )
+    SELECT 
+      COUNT(DISTINCT user_id) as n_users,
+      SUM(group_size) as total_people,
+      AVG(user_avg) as mean_score,
+      STDDEV(user_avg) as sd_score,
+      MIN(user_avg) as min_score,
+      MAX(user_avg) as max_score
+    FROM user_stats
+  ", params = list(as.character(project_id), paste0(topic_prefix, "%")))
+      
+      if (nrow(result) == 0 || is.na(result$n_users[1]) || result$n_users[1] == 0) {
         return(data.frame(
-          Frage = character(0),
-          Min = numeric(0),
-          Mittelwert = numeric(0),
-          Max = numeric(0),
-          Anzahl_Personen = integer(0)
+          Statistik = c("Anzahl Teilnehmer", "Gesamtzahl Personen", "Durchschnitt", "Standardabweichung", "Minimum", "Maximum"),
+          Wert = c("0", "0", "-", "-", "-", "-")
         ))
       }
       
-      # ✅ Calculate statistics on expanded data
-      stats <- expanded %>%
-        group_by(question_id) %>%
-        summarise(
-          Min = min(response_value, na.rm = TRUE),
-          Max = max(response_value, na.rm = TRUE),
-          Mittelwert = mean(response_value, na.rm = TRUE),
-          Anzahl_Personen = n(),
-          .groups = "drop"
+      data.frame(
+        Statistik = c("Anzahl Teilnehmer", "Gesamtzahl Personen", "Durchschnitt", "Standardabweichung", "Minimum", "Maximum"),
+        Wert = c(
+          as.character(result$n_users[1]),
+          as.character(result$total_people[1]),
+          sprintf("%.2f", result$mean_score[1]),
+          sprintf("%.2f", ifelse(is.na(result$sd_score[1]), 0, result$sd_score[1])),
+          sprintf("%.2f", result$min_score[1]),
+          sprintf("%.2f", result$max_score[1])
         )
-      
-      # Add question labels
-      stats$Frage <- sapply(stats$question_id, function(qid)
-        get_question_label(question_list, qid))
-      
-      stats <- stats[, c("Frage", "Min", "Mittelwert", "Max", "Anzahl_Personen")]
-      
-      return(stats)
+      )
     }
     
     #--------------Spider Plot Data----------------------------------------------
     
-    get_weighted_spider_data <- function(project_id, topic_key, binary_qnums = integer()) {
-      message("  === get_weighted_spider_data START ===")
-      message("  project_id: ", project_id)
-      message("  topic_key: ", topic_key)
+    get_weighted_spider_data <- function(project_id, topic_name, binary_qnums = NULL) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
       
-      # Check if questionnaires exists
-      if (!exists("questionnaires", inherits = TRUE)) {
-        message("  ERROR: questionnaires not found in scope!")
-        return(NULL)
-      }
+      # Map topic names to question prefixes
+      topic_prefix <- switch(topic_name,
+                             "fuehrung" = "F",
+                             "mitarbeitende" = "M",
+                             "patienten" = "P",
+                             "einsender" = "E",
+                             "qualitaet" = "Q",
+                             NULL
+      )
       
-      question_list <- questionnaires[[topic_key]]
+      if (is.null(topic_prefix)) return(NULL)
       
-      if (is.null(question_list)) {
-        message("  ERROR: question_list is NULL for topic: ", topic_key)
-        return(NULL)
-      }
+      # ✅ Use question_id LIKE instead of tag =
+      df <- DBI::dbGetQuery(con, "
+    SELECT 
+      r.question_id,
+      r.user_id,
+      r.response_value,
+      qd.answers::json->>'Berufsgruppe' as berufsgruppe
+    FROM responses r
+    LEFT JOIN questionnaire_drafts qd 
+      ON qd.user_id::text = r.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id = $1
+      AND r.question_id LIKE $2
+      AND r.response_value ~ '^[0-9]+$'
+  ", params = list(project_id, paste0(topic_prefix, "%")))
       
-      message("  question_list length: ", length(question_list))
+      if (nrow(df) == 0) return(NULL)
       
-      # Filter binary questions
-      if (length(binary_qnums) > 0) {
-        question_list <- Filter(function(q) !(q$number %in% binary_qnums), question_list)
-        message("  After filtering binary: ", length(question_list), " questions")
-      }
+      df$response_value <- as.numeric(df$response_value)
+      df$berufsgruppe[is.na(df$berufsgruppe)] <- "Unbekannt"
       
-      question_ids <- sapply(question_list, function(q) q$id)
-      message("  question_ids: ", paste(question_ids, collapse = ", "))
+      # Get question numbers for labeling
+      df$qnum <- as.integer(gsub("^[A-Z]+", "", df$question_id))
       
-      expanded <- expand_responses_by_group(project_id, question_ids)
-      message("  expanded rows: ", nrow(expanded))
+      # Calculate weighted averages per question
+      weighted_avgs <- df %>%
+        group_by(question_id, qnum, berufsgruppe) %>%
+        summarise(group_mean = mean(response_value, na.rm = TRUE), .groups = "drop") %>%
+        group_by(question_id, qnum) %>%
+        summarise(weighted_avg = mean(group_mean, na.rm = TRUE), .groups = "drop") %>%
+        arrange(qnum)
       
-      if (nrow(expanded) == 0) {
-        message("  No expanded data - returning NULL")
-        return(NULL)
-      }
+      if (nrow(weighted_avgs) == 0) return(NULL)
       
-      means <- expanded %>%
-        group_by(question_id) %>%
-        summarise(mean_value = mean(response_value, na.rm = TRUE), .groups = "drop")
-      
-      message("  Calculated means for ", nrow(means), " questions")
-      
-      values <- sapply(question_list, function(q) {
-        row <- means[means$question_id == q$id, ]
-        if (nrow(row) > 0) row$mean_value else 0
-      })
-      
-      labels <- sapply(question_list, function(q) as.character(q$number))
-      
-      message("  Final values: ", paste(round(values, 2), collapse = ", "))
-      message("  Final labels: ", paste(labels, collapse = ", "))
-      message("  === get_weighted_spider_data END ===")
-      
-      return(list(values = values, labels = labels))
+      list(
+        values = weighted_avgs$weighted_avg,
+        labels = paste0("Q", weighted_avgs$qnum)
+      )
     }
     
     #--------------Individual Responses------------------------------------------
     
-    get_selbstbewertung_topic_responses <- function(project_id, topic_key) {
-      question_list <- questionnaires[[topic_key]]
-      if (is.null(question_list)) return(data.frame())
-      question_ids <- sapply(question_list, function(q) q$id)
-      
+    get_selbstbewertung_topic_responses <- function(project_id, topic_name) {
       con <- get_db_con()
       on.exit(DBI::dbDisconnect(con), add = TRUE)
       
-      sql <- sprintf(
-        "SELECT r.user_id, u.username, r.question_id, r.response_value, r.text_value, 
-            r.created_at, COALESCE(r.group_size, 1) as group_size
-     FROM responses r
-     JOIN users u ON r.user_id = u.id
-     WHERE r.project_id = $1
-       AND r.question_id IN (%s)
-       AND r.assessment_type = 'selbstbewertung'
-     ORDER BY r.user_id, r.question_id",
-        paste0("'", question_ids, "'", collapse = ", ")
+      # Map topic names to question prefixes
+      topic_prefix <- switch(topic_name,
+                             "fuehrung" = "F",
+                             "mitarbeitende" = "M",
+                             "patienten" = "P",
+                             "einsender" = "E",
+                             "qualitaet" = "Q",
+                             NULL
       )
       
-      df <- DBI::dbGetQuery(con, sql, params = list(project_id))
-      if (nrow(df) == 0) return(df)
+      if (is.null(topic_prefix)) {
+        return(data.frame(
+          Frage = character(0),
+          Berufsgruppe = character(0),
+          Bewertung = character(0),
+          Begründung = character(0)
+        ))
+      }
       
-      # Attach question labels
-      df$Frage <- sapply(df$question_id, function(qid)
-        get_question_label(question_list, qid))
+      # ✅ Use question_id LIKE instead of tag =
+      result <- DBI::dbGetQuery(con, "
+    SELECT 
+      r.question_id,
+      COALESCE(qd.answers::json->>'Berufsgruppe', 'Unbekannt') as berufsgruppe,
+      r.response_value,
+      r.text_value
+    FROM responses r
+    LEFT JOIN questionnaire_drafts qd 
+      ON qd.user_id::text = r.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id = $1
+      AND r.question_id LIKE $2
+      AND r.assessment_type = 'selbstbewertung'
+    ORDER BY r.question_id, berufsgruppe
+  ", params = list(project_id, paste0(topic_prefix, "%")))
       
-      # ✅ Show group size in username
-      df$username <- ifelse(
-        df$group_size > 1,
-        paste0(df$username, " (", df$group_size, " Personen)"),
-        df$username
+      if (nrow(result) == 0) {
+        return(data.frame(
+          Frage = character(0),
+          Berufsgruppe = character(0),
+          Bewertung = character(0),
+          Begründung = character(0)
+        ))
+      }
+      
+      data.frame(
+        Frage = result$question_id,
+        Berufsgruppe = result$berufsgruppe,
+        Bewertung = result$response_value,
+        Begründung = substr(result$text_value, 1, 200)
       )
-      
-      # Build radio button icons
-      df$Antwort <- sapply(df$response_value, function(val) {
-        tagList(
-          lapply(1:5, function(j) {
-            if (!is.na(val) && as.character(j) == as.character(val)) {
-              tags$span(style="font-weight:bold;font-size:1.2em;", icon("dot-circle"), j)
-            } else {
-              tags$span(style="font-size:1.1em;", icon("circle"), j)
-            }
-          })
-        )
-      })
-      
-      # Reorder for display
-      df <- df[, c("username", "Frage", "Antwort", "text_value", "created_at")]
-      names(df) <- c("Nutzer", "Frage", "Antwort", "Begründung", "Zeitpunkt")
-      return(df)
     }
     
     #-------------------- Project Summary ----------------------------------------
@@ -6393,9 +7138,6 @@ tabItem(
     
 #--------------Project Selector for All Roles--------------------------------
     
-    #    output$labor_leiter_summary_project_selector_ui <- renderUI({
-
-    
     output$labor_leiter_summary_project_selector_ui <- renderUI({
       role <- user_role()
       uid <- user_id()
@@ -6417,7 +7159,7 @@ tabItem(
           "SELECT id, title FROM projects WHERE id = (SELECT project_id FROM users WHERE id = $1)",
           params = list(uid)
         )
-      } else if (role == "admin") {  # ✅ Admin support
+      } else if (role == "admin") {
         projs <- DBI::dbGetQuery(
           con,
           "SELECT id, title FROM projects ORDER BY created_at DESC"
@@ -6461,13 +7203,74 @@ tabItem(
       }
     })
     
+    #--------------Helper Function: Get Berufsgruppe Breakdown-------------------
+    
+    get_berufsgruppe_breakdown <- function(project_id) {
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      project_id_str <- as.character(project_id)
+      
+      query <- "
+    SELECT 
+      qd.answers::json->>'Berufsgruppe' as berufsgruppe,
+      COUNT(DISTINCT u.id) as n_users,
+      SUM(CAST(qd.answers::json->>'group_size' AS INTEGER)) as n_people
+    FROM users u
+    LEFT JOIN questionnaire_drafts qd 
+      ON u.id::text = qd.user_id::text 
+      AND u.project_id::text = qd.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE u.project_id::text = $1
+      AND u.role IN ('laborleitung', 'colleague')
+      AND qd.answers IS NOT NULL
+      AND qd.answers::json->>'Berufsgruppe' IS NOT NULL
+    GROUP BY qd.answers::json->>'Berufsgruppe'
+    ORDER BY berufsgruppe
+  "
+      
+      breakdown <- DBI::dbGetQuery(con, query, params = list(project_id_str))
+      
+      # 🔍 DEBUG
+      cat("\n=== get_berufsgruppe_breakdown result ===\n")
+      print(breakdown)
+      print(paste("Columns:", paste(colnames(breakdown), collapse=", ")))
+      cat("===\n")
+      
+      return(breakdown)
+    }
+    
     #--------------Wire Up Statistics Outputs------------------------------------
     
     # Führung
     output$fuehrung_stats_table <- renderTable({
       req(current_project_id())
-      get_topic_weighted_stats(current_project_id(), "fuehrung")
-    }, digits = 2)
+      stats <- get_topic_weighted_stats(current_project_id(), "fuehrung")
+      
+      # Add Berufsgruppe breakdown
+      berufsgruppe_data <- get_berufsgruppe_breakdown(current_project_id())
+      
+      if (nrow(berufsgruppe_data) > 0) {
+        # Create breakdown text
+        breakdown_text <- paste(
+          berufsgruppe_data$Berufsgruppe, 
+          " (n=", berufsgruppe_data$Anzahl, ")", 
+          sep = "", 
+          collapse = ", "
+        )
+        
+        # Add to stats
+        stats <- rbind(
+          stats,
+          data.frame(
+            Statistik = "Berufsgruppen",
+            Wert = breakdown_text
+          )
+        )
+      }
+      
+      stats
+    }, digits = 2, sanitize.text.function = function(x) x)
     
     output$fuehrung_responses <- DT::renderDataTable({
       req(current_project_id())
@@ -6477,8 +7280,29 @@ tabItem(
     # Mitarbeitende
     output$mitarbeitende_stats_table <- renderTable({
       req(current_project_id())
-      get_topic_weighted_stats(current_project_id(), "mitarbeitende")
-    }, digits = 2)
+      stats <- get_topic_weighted_stats(current_project_id(), "mitarbeitende")
+      
+      berufsgruppe_data <- get_berufsgruppe_breakdown(current_project_id())
+      
+      if (nrow(berufsgruppe_data) > 0) {
+        breakdown_text <- paste(
+          berufsgruppe_data$Berufsgruppe, 
+          " (n=", berufsgruppe_data$Anzahl, ")", 
+          sep = "", 
+          collapse = ", "
+        )
+        
+        stats <- rbind(
+          stats,
+          data.frame(
+            Statistik = "Berufsgruppen",
+            Wert = breakdown_text
+          )
+        )
+      }
+      
+      stats
+    }, digits = 2, sanitize.text.function = function(x) x)
     
     output$mitarbeitende_responses <- DT::renderDataTable({
       req(current_project_id())
@@ -6488,8 +7312,29 @@ tabItem(
     # Patienten
     output$pat_stats_table <- renderTable({
       req(current_project_id())
-      get_topic_weighted_stats(current_project_id(), "patienten")
-    }, digits = 2)
+      stats <- get_topic_weighted_stats(current_project_id(), "patienten")
+      
+      berufsgruppe_data <- get_berufsgruppe_breakdown(current_project_id())
+      
+      if (nrow(berufsgruppe_data) > 0) {
+        breakdown_text <- paste(
+          berufsgruppe_data$Berufsgruppe, 
+          " (n=", berufsgruppe_data$Anzahl, ")", 
+          sep = "", 
+          collapse = ", "
+        )
+        
+        stats <- rbind(
+          stats,
+          data.frame(
+            Statistik = "Berufsgruppen",
+            Wert = breakdown_text
+          )
+        )
+      }
+      
+      stats
+    }, digits = 2, sanitize.text.function = function(x) x)
     
     output$pat_responses <- DT::renderDataTable({
       req(current_project_id())
@@ -6499,8 +7344,29 @@ tabItem(
     # Einsender
     output$ein_stats_table <- renderTable({
       req(current_project_id())
-      get_topic_weighted_stats(current_project_id(), "einsender")
-    }, digits = 2)
+      stats <- get_topic_weighted_stats(current_project_id(), "einsender")
+      
+      berufsgruppe_data <- get_berufsgruppe_breakdown(current_project_id())
+      
+      if (nrow(berufsgruppe_data) > 0) {
+        breakdown_text <- paste(
+          berufsgruppe_data$Berufsgruppe, 
+          " (n=", berufsgruppe_data$Anzahl, ")", 
+          sep = "", 
+          collapse = ", "
+        )
+        
+        stats <- rbind(
+          stats,
+          data.frame(
+            Statistik = "Berufsgruppen",
+            Wert = breakdown_text
+          )
+        )
+      }
+      
+      stats
+    }, digits = 2, sanitize.text.function = function(x) x)
     
     output$ein_responses <- DT::renderDataTable({
       req(current_project_id())
@@ -6510,15 +7376,36 @@ tabItem(
     # Qualität
     output$qual_stats_table <- renderTable({
       req(current_project_id())
-      get_topic_weighted_stats(current_project_id(), "qualitaet")
-    }, digits = 2)
+      stats <- get_topic_weighted_stats(current_project_id(), "qualitaet")
+      
+      berufsgruppe_data <- get_berufsgruppe_breakdown(current_project_id())
+      
+      if (nrow(berufsgruppe_data) > 0) {
+        breakdown_text <- paste(
+          berufsgruppe_data$Berufsgruppe, 
+          " (n=", berufsgruppe_data$Anzahl, ")", 
+          sep = "", 
+          collapse = ", "
+        )
+        
+        stats <- rbind(
+          stats,
+          data.frame(
+            Statistik = "Berufsgruppen",
+            Wert = breakdown_text
+          )
+        )
+      }
+      
+      stats
+    }, digits = 2, sanitize.text.function = function(x) x)
     
     output$qual_responses <- DT::renderDataTable({
       req(current_project_id())
       get_selbstbewertung_topic_responses(current_project_id(), "qualitaet")
     }, escape = FALSE, options = list(pageLength = 10))
     
-    #--------------Spider Plots for All Topics-----------------------------------
+    #--------------Spider Plots for All Topics (with legend at bottom)-----------
     
     output$fuehrung_spider <- renderPlotly({
       message("=== START: Rendering fuehrung_spider ===")
@@ -6547,19 +7434,26 @@ tabItem(
         r = data$values,
         theta = data$labels,
         fill = 'toself',
+        name = "Durchschnitt",
         fillcolor = "rgba(1, 115, 178, 0.3)",
         line = list(color = 'rgb(1, 115, 178)', width = 2)
       ) %>%
         layout(
-          title = "Führung - Durchschnitt (gewichtet nach Personenzahl)",
-          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5)))
+            title = "Führung - Durchschnitt (gewichtet nach Personenzahl)",
+          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5))),
+          legend = list(
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center",
+            y = -0.2,
+            yanchor = "top"
+          )
         )
       
       message("=== END: fuehrung_spider completed ===")
       
       return(plot)
     })
-    
     
     output$mitarbeitende_spider <- renderPlotly({
       req(current_project_id())
@@ -6575,12 +7469,23 @@ tabItem(
         r = data$values,
         theta = data$labels,
         fill = 'toself',
+        name = "Durchschnitt",
         fillcolor = "rgba(222, 143, 5, 0.3)",
         line = list(color = 'rgb(222, 143, 5)', width = 2)
       ) %>%
         layout(
-          title = "Mitarbeitende - Durchschnitt",
-          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5)))
+          list(
+            title = "Mitarbeitende - Durchschnitt (gewichtet nach Personenzahl)",
+            font = list(size = 14)
+          ),
+          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5))),
+          legend = list(
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center",
+            y = -0.2,
+            yanchor = "top"
+          )
         )
     })
     
@@ -6598,12 +7503,20 @@ tabItem(
         r = data$values,
         theta = data$labels,
         fill = 'toself',
+        name = "Durchschnitt",
         fillcolor = "rgba(2, 158, 115, 0.3)",
         line = list(color = 'rgb(2, 158, 115)', width = 2)
       ) %>%
         layout(
           title = "Patienten & Angehörige - Durchschnitt",
-          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5)))
+          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5))),
+          legend = list(
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center",
+            y = -0.2,
+            yanchor = "top"
+          )
         )
     })
     
@@ -6621,12 +7534,20 @@ tabItem(
         r = data$values,
         theta = data$labels,
         fill = 'toself',
+        name = "Durchschnitt",
         fillcolor = "rgba(204, 120, 188, 0.3)",
         line = list(color = 'rgb(204, 120, 188)', width = 2)
       ) %>%
         layout(
           title = "Einsender & Kooperationspartner - Durchschnitt",
-          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5)))
+          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5))),
+          legend = list(
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center",
+            y = -0.2,
+            yanchor = "top"
+          )
         )
     })
     
@@ -6644,12 +7565,20 @@ tabItem(
         r = data$values,
         theta = data$labels,
         fill = 'toself',
+        name = "Durchschnitt",
         fillcolor = "rgba(202, 145, 97, 0.3)",
         line = list(color = 'rgb(202, 145, 97)', width = 2)
       ) %>%
         layout(
           title = "Qualitätsindikatoren - Durchschnitt",
-          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5)))
+          polar = list(radialaxis = list(visible = TRUE, range = c(0, 5))),
+          legend = list(
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center",
+            y = -0.2,
+            yanchor = "top"
+          )
         )
     })
     
@@ -9109,7 +10038,6 @@ tabItem(
 
     
     #------------------Fragebogen_ui for leading peer and the co peer------------
-    
 
     output$fragebogen_ui <- renderUI({
       req(user_logged_in())
@@ -9122,24 +10050,49 @@ tabItem(
       # ✅ LOAD SAVED FREMDBEWERTUNG DRAFT
       saved_fremd <- resume_fremdbewertung_draft()
       
-      # ✅ ONLY ONE create_table_rows - WITH DRAFT LOADING
       create_table_rows <- function(df, questions_list) {
         rows <- lapply(questions_list, function(q) {
           qid <- q$id
           q_num <- q$number  
           selb_rows <- df[df$question_id == qid & df$response_value != "", ]
           
+          # 🔍 DEBUG - Add this
+          if (qid == "F1") {
+            cat("\n=== FRAGEBOGEN DEBUG F1 ===\n")
+            print("Columns in selb_rows:")
+            print(colnames(selb_rows))
+            print("Data:")
+            print(selb_rows[, c("response_value", "group_size")])
+          }
+          
           selb_display <- if (nrow(selb_rows) > 0) {
             
-            # Group by response_value and count
-            rating_counts <- table(selb_rows$response_value)
+            if (!"group_size" %in% colnames(selb_rows)) {
+              cat("ERROR: group_size missing in fragebogen for", qid, "\n")
+              selb_rows$group_size <- 1
+            }
+            selb_rows$group_size[is.na(selb_rows$group_size)] <- 1
             
-            # Rating badges with count
+            total_people <- sum(selb_rows$group_size, na.rm = TRUE)
+            
+            rating_weighted <- aggregate(group_size ~ response_value, data = selb_rows, FUN = sum)
+            rating_counts_weighted <- setNames(rating_weighted$group_size, rating_weighted$response_value)
+            
+            # 🔍 DEBUG for F1
+            if (qid == "F1") {
+              cat("rating_weighted:\n")
+              print(rating_weighted)
+              cat("rating_counts_weighted:\n")
+              print(rating_counts_weighted)
+            }
+            
             rating_display <- tags$div(
               class = "rating-inline",
               lapply(c("N/A", "1", "2", "3", "4", "5"), function(j) {
-                count <- as.integer(rating_counts[j])
-                if (!is.na(count) && count > 0) {
+                count <- rating_counts_weighted[as.character(j)]
+                count <- if (is.na(count)) 0 else as.integer(count)
+                
+                if (count > 0) {
                   if (count == 1) {
                     tags$span(class = "rating-active", j)
                   } else {
@@ -9154,37 +10107,33 @@ tabItem(
                 }
               })
             )
-            
-            # Total respondents info
-            total_respondents <- nrow(selb_rows)
-            respondent_info <- if (total_respondents > 1) {
+            respondent_info <- if (total_people > 1) {
               tags$div(
                 class = "respondent-info",
                 icon("users"),
-                paste0(" ", total_respondents, " Teilnehmer")
+                paste0(" ", total_people, " Teilnehmer")
               )
             } else {
               NULL
             }
             
-            # ✅ TEXTS WITH COUNT BADGE - ALWAYS show badge
-            texts <- selb_rows$text_value[selb_rows$text_value != "" & !is.na(selb_rows$text_value)]
-            text_display <- if (length(texts) > 0) {
-              text_counts <- table(texts)
-              unique_texts <- names(text_counts)
+            # Weight text counts
+            texts_with_group <- selb_rows[selb_rows$text_value != "" & !is.na(selb_rows$text_value), 
+                                          c("text_value", "group_size")]
+            
+            text_display <- if (nrow(texts_with_group) > 0) {
+              text_weighted <- aggregate(group_size ~ text_value, data = texts_with_group, FUN = sum)
               
               tags$div(
                 class = "selbst-text-container",
-                lapply(unique_texts, function(txt) {
-                  count <- as.integer(text_counts[txt])
+                lapply(1:nrow(text_weighted), function(i) {
+                  txt <- text_weighted$text_value[i]
+                  count <- text_weighted$group_size[i]
                   tags$div(
                     class = "selbst-text-item",
                     icon("comment-o"),
                     txt,
-                    tags$span(
-                      class = "text-count-badge",
-                      paste0("\u00d7", count)
-                    )
+                    tags$span(class = "text-count-badge", paste0("\u00d7", count))
                   )
                 })
               )
@@ -9192,16 +10141,11 @@ tabItem(
               NULL
             }
             
-            tags$div(
-              rating_display,
-              respondent_info,
-              text_display
-            )
-            
+            tags$div(rating_display, respondent_info, text_display)
           } else {
             tags$span(class = "no-data", "\u2014")
           }
-          
+            
           # ✅ Load saved fremdbewertung values from DRAFT
           score_key <- paste0("FremdbewertungNum_", qid)
           text_key <- paste0("FremdbewertungText_", qid)
@@ -9250,49 +10194,107 @@ tabItem(
       
       # Fetch data for all topics
       fuehrung_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'F%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'F%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
+      
       
       mit_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'M%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'M%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
+      
       
       pat_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'P%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'P%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
       ein_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'E%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'E%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
+      
       
       qual_df <- DBI::dbGetQuery(con, "
-    SELECT u.username, r.question_id, r.response_value, r.text_value
-    FROM responses r
-    JOIN users u ON u.id = r.user_id
-    WHERE r.project_id = $1 AND r.assessment_type = 'selbstbewertung'
-      AND r.question_id LIKE 'Q%'
-    ORDER BY r.question_id, u.username
-  ", params = list(project_id))
+  SELECT 
+    u.username, 
+    u.id as user_id,
+    r.question_id, 
+    r.response_value, 
+    r.text_value,
+    CAST(qd.answers::json->>'group_size' AS INTEGER) as group_size
+  FROM responses r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN questionnaire_drafts qd 
+    ON u.id::text = qd.user_id::text 
+    AND qd.project_id::text = r.project_id::text
+    AND qd.questionnaire_id = 'peer_review'
+  WHERE r.project_id::text = $1::text 
+    AND r.assessment_type = 'selbstbewertung'
+    AND r.question_id LIKE 'Q%'
+  ORDER BY r.question_id, u.username
+", params = list(as.character(project_id)))
       
       # Create tables
       create_topic_table <- function(df, questions_list) {
@@ -12514,8 +13516,8 @@ make_fmsb_radar_png <- function(radar_df, title, colour = "#003B73",
         axislabcol = "grey",                       # Axis label color
         
         # Variable labels
-        vlcex = 1.0,                               # Label size
-        vlabels = colnames(radar_df),              # Label text
+        vlcex = 1.2,                               # Label size
+        vlabels = colnames(radar_df),
         
         # Axis labels
         caxislabels = c("0", "1", "2", "3", "4", "5"),
@@ -12643,15 +13645,21 @@ get_berufsgruppe_stats <- function(project_id) {
   return(result)
 }
 
-# Create overlaid radar chart for multiple Berufsgruppen
-# Create overlaid radar chart for multiple Berufsgruppen
+#------------------------ Create overlaid radar chart for multiple Berufsgruppen
 make_fmsb_overlay_radar <- function(project_id, questions, title, 
                                     binary_qnums = integer(),
                                     filename = "overlay_radar.png",
                                     width = 800, height = 600) {
   
-  # Get data by Berufsgruppe
-  data <- get_berufsgruppe_radar_data(project_id, questions, binary_qnums)
+  # Get weighted data by Berufsgruppe
+  data <- get_berufsgruppe_radar_data_weighted(project_id, questions, binary_qnums)
+  
+  # 🔍 DEBUG: Show what data we're plotting
+  cat("\n=== RADAR PLOT DATA DEBUG ===\n")
+  cat("Title:", title, "\n")
+  print("Data for radar plot:")
+  print(data)
+  cat("===\n\n")
   
   if (is.null(data) || nrow(data) == 0) {
     # Create empty plot
@@ -12666,6 +13674,10 @@ make_fmsb_overlay_radar <- function(project_id, questions, title,
   berufsgruppen <- data$berufsgruppe
   numeric_data <- data[, -1, drop = FALSE]
   
+  # ✅ FIX: Extract question numbers (remove prefix like "F", "M", etc.)
+  question_labels <- sapply(questions, function(q) as.character(q$number))
+  colnames(numeric_data) <- question_labels
+  
   # Create max/min rows
   num_questions <- ncol(numeric_data)
   max_row <- rep(5, num_questions)
@@ -12673,77 +13685,94 @@ make_fmsb_overlay_radar <- function(project_id, questions, title,
   
   # Combine: max, min, then all Berufsgruppen
   radar_df <- rbind(max_row, min_row, numeric_data)
-  colnames(radar_df) <- colnames(numeric_data)
+  colnames(radar_df) <- question_labels  # ✅ Use just numbers
   rownames(radar_df) <- c("Max", "Min", berufsgruppen)
   
-  # ✅ Use colorblind-friendly palette
+  # Color map
+  # color_map <- c(
+  #   "MTL"                   = "#0072B2",  # Blue
+  #   "Wissenschaftler(-in)"  = "#D55E00",  # Vermillion/Orange
+  #   "Ärzte"                 = "#009E73",  # Bluish Green
+  #   "IT"                    = "#CC79A7"   # Reddish Purple
+  # )
+  # 
   color_map <- c(
-    "MTL"                   = "#0072B2",  # Blue
-    "Wissenschaftler(-in)"  = "#D55E00",  # Vermillion/Orange
-    "Ärzte"                 = "#009E73",  # Bluish Green
-    "IT"                    = "#CC79A7"   # Reddish Purple
+    "MTL"                  = "#1F77B4",  # Strong blue
+    "Wissenschaftler(-in)" = "#FF7F0E",  # Orange
+    "Ärzte"                = "#2CA02C",  # Green
+    "IT"                   = "#9467BD"   # Purple
   )
   
+  # color_map <- c(
+  #   "MTL"                  = "#2E86AB",
+  #   "Wissenschaftler(-in)" = "#F18F01",
+  #   "Ärzte"                = "#00A676",
+  #   "IT"                   = "#B8336A"
+  # )
+  
   colors <- color_map[berufsgruppen]
-  fill_colors <- scales::alpha(colors, 0.25)  # Semi-transparent fill
+  fill_colors <- scales::alpha(colors, 0.18)
   
   # Open PNG device
   png(filename, width = width, height = height, res = 120)
-  op <- par(mar = c(1, 1, 3, 1))
+  
+  # ✅ FIX: Increase bottom margin for legend
+  op <- par(mar = c(4, 1, 3, 1))  # Increased bottom margin from 1 to 4
   
   tryCatch({
     radarchart(
       radar_df, 
       axistype = 1,
       
-      # ✅ Enhanced polygon styling
-      pcol = colors,                    # Line colors (solid)
-      pfcol = fill_colors,              # Fill colors (transparent)
-      plwd = 3,                         # Thick lines for visibility
-      plty = 1,                         # Solid lines
+      # Polygon styling
+      pcol = colors,
+      pfcol = fill_colors,
+      plwd = 3,
+      plty = 1,
       
-      # ✅ Enhanced grid styling
-      cglcol = "#CCCCCC",               # Light gray grid
-      cglty = 1,                        # Solid grid lines
-      cglwd = 1.2,                      # Visible grid
+      # Grid styling
+      cglcol = "#CCCCCC",
+      cglty = 1,
+      cglwd = 1.2,
       
-      # ✅ Enhanced axis styling
-      axislabcol = "#666666",           # Medium gray axis labels
+      # Axis styling
+      axislabcol = "#666666",
       
-      # Variable labels (question numbers)
-      vlcex = 1.2,                      # Larger label size
-      vlabels = colnames(radar_df),     
+      # ✅ Variable labels (now just numbers: 1, 2, 3...)
+      vlcex = 1.2,
+      vlabels = colnames(radar_df),
       
-      # ✅ Better axis labels
+      # Axis labels
       caxislabels = c("0", "1", "2", "3", "4", "5"),
-      calcex = 1.0,                     # Axis label size
+      calcex = 1.0,
       
       # No default title
       title = ""
     )
     
-    # ✅ Add custom title with better styling
+    # Add custom title
     title(
-      main = title,
-      cex.main = 1.5,
+      main = paste0(title, " (Gewichtet)"),
+      cex.main = 0.9,
       font.main = 2,
       col.main = "#333333"
     )
     
-    # ✅ Enhanced legend with color indicators
+    # ✅ FIX: Legend at bottom with proper positioning
     legend(
-      x = "topright",
+      x = "bottom",              # Position at bottom
       legend = berufsgruppen,
       col = colors,
       lty = 1,
       lwd = 4,
-      bty = "n",
+      bty = "n",                 # No box
       cex = 1.1,
+      horiz = TRUE,              # Horizontal layout
       title = "Berufsgruppe",
       title.col = "#333333",
       text.col = "#333333",
-      pt.cex = 2,
-      seg.len = 3
+      xpd = TRUE,                # Allow drawing outside plot area
+      inset = c(0, -0.15)        # Move down slightly
     )
     
   }, error = function(e) {
@@ -12756,12 +13785,67 @@ make_fmsb_overlay_radar <- function(project_id, questions, title,
   
   return(filename)
 }
-
+#============================================================================
+# ✅ ALTERNATIVE: Using unnest for safe array handling
+#============================================================================
+#============================================================================
+# Get Weighted Radar Data by Berufsgruppe
+#============================================================================
+get_berufsgruppe_radar_data_weighted <- function(project_id, questions, binary_qnums = integer()) {
+  con <- get_db_con()
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+  
+  qids <- sapply(questions, function(q) q$id)
+  qids_quoted <- paste0("'", qids, "'", collapse = ", ")
+  
+  query <- paste0("
+    SELECT 
+      qd.answers::json->>'Berufsgruppe' as berufsgruppe,
+      r.question_id,
+      -- Weighted average: sum(score * group_size) / sum(group_size)
+      SUM(
+        CASE 
+          WHEN r.response_value ~ '^[0-9]+$' 
+          THEN CAST(r.response_value AS NUMERIC) * CAST(qd.answers::json->>'group_size' AS INTEGER)
+          ELSE 0 
+        END
+      ) / NULLIF(SUM(CAST(qd.answers::json->>'group_size' AS INTEGER)), 0) as weighted_mean
+    FROM responses r
+    JOIN users u ON u.id = r.user_id
+    LEFT JOIN questionnaire_drafts qd 
+      ON u.id::text = qd.user_id::text 
+      AND qd.project_id::text = r.project_id::text
+      AND qd.questionnaire_id = 'peer_review'
+    WHERE r.project_id::text = '", project_id, "'
+      AND r.assessment_type = 'selbstbewertung'
+      AND r.question_id IN (", qids_quoted, ")
+      AND r.response_value != ''
+      AND r.response_value != 'N/A'
+      AND qd.answers IS NOT NULL
+    GROUP BY qd.answers::json->>'Berufsgruppe', r.question_id
+    ORDER BY berufsgruppe, r.question_id
+  ")
+  
+  result <- DBI::dbGetQuery(con, query)
+  
+  if (nrow(result) == 0) {
+    return(NULL)
+  }
+  
+  # Pivot to wide format (Berufsgruppe as rows, questions as columns)
+  wide_data <- reshape2::dcast(result, berufsgruppe ~ question_id, value.var = "weighted_mean")
+  
+  # 🔍 DEBUG
+  cat("\n=== get_berufsgruppe_radar_data_weighted DEBUG ===\n")
+  print("Query result (long format):")
+  print(head(result))
+  print("\nWide format for radar:")
+  print(wide_data)
+  cat("===\n\n")
+  
+  return(wide_data)
+}
 #------------- OVERLAY RADAR PLOTS FOR LEADING PEER DASHBOARD-------------------
-
-# ============================================================================
-# OVERLAY RADAR PLOTS WITH COLORBLIND-FRIENDLY PALETTE
-# ============================================================================
 
 output$overlay_radar_fuehrung_leading <- renderPlot({
   req(current_project_id())
@@ -13655,155 +14739,595 @@ observeEvent(input$submit_peer_fremdbewertung_qual, {
 })
 
 
-# ------------------ gesamte bericht -------------------------------------------
-output$downloadLeadingPeerGesamtbericht <- downloadHandler(
-  filename = function() paste0("Gesamter_Bericht_", Sys.Date(), ".pdf"),
-  content = function(file) {
-    project_id <- input$report_project_selector_leading
-    if (is.null(project_id) || project_id == "" || is.na(project_id)) {
-      showNotification("Bitte wählen Sie ein Projekt aus.", type = "error")
+#---------------------fremdbewertung download handler---------------------------
+
+output$downloadFremdbewertung <- downloadHandler(
+  filename = function() paste0("fremdbewertung_", format(Sys.Date(), "%Y%m%d"), ".pdf"),
+  content  = function(file) {
+    
+    message("=== Fremdbewertung Download started ===")
+    
+    # Use .Rmd file
+    template_file <- "fremdbewertung_report.Rmd"
+    
+    if (!file.exists(template_file)) {
+      showNotification("Template nicht gefunden.", type = "error", duration = 10)
+      writeLines("Template nicht verfügbar.", file)
       return(NULL)
     }
-    template_path <- normalizePath("gesamtbericht_report.Rnw")
-    owd <- setwd(tempdir()); on.exit(setwd(owd), add = TRUE)
-    con <- get_db_con(); on.exit(DBI::dbDisconnect(con), add = TRUE)
-    labinfo <- DBI::dbGetQuery(con, "SELECT * FROM lab_info WHERE project_id = $1", params = list(project_id))
-    if (nrow(labinfo) == 0) { 
-      showNotification("Keine Labordaten für dieses Projekt.", type = "error")
-      minimal_rnw <- '
-\\documentclass[10pt,a4paper]{report}
-\\usepackage[margin=0.8in]{geometry}
-\\usepackage[utf8]{inputenc}
-\\usepackage[T1]{fontenc}
-\\begin{document}
-\\section*{Fehler}
-\\textbf{Keine Labordaten für dieses Projekt.}
-\\end{document}
-'
-      writeLines(minimal_rnw, "error_report.Rnw")
-      out <- knitr::knit2pdf("error_report.Rnw", clean = TRUE)
-      file.rename(out, file)
-      return()
-    }
-    file.copy(template_path, "gesamtbericht_report.Rnw", overwrite = TRUE)
     
-    # Write questions and answers tables for each topic
-    write_questions_table <- function(questions_list, file) {
-      questions <- sapply(questions_list, function(q) q$label)
-      df <- data.frame(Fragen = questions, stringsAsFactors=FALSE)
-      cat(knitr::kable(df, format="latex", booktabs=TRUE, col.names="Fragen"), file=file)
-    }
-    safe_round <- function(x) {
-      val <- suppressWarnings(as.numeric(x))
-      if (!is.na(val)) as.character(round(val)) else ""
-    }
-    
-    write_answers_table <- function(con, project_id, questions_list, file) {
-      qids <- sapply(questions_list, function(q) q$id)
+    tryCatch({
       
-      # Get selbstbewertung (left side)
-      selbst_df <- DBI::dbGetQuery(con, sprintf(
-        "SELECT r.question_id, 
-            AVG(r.response_value::numeric) as avg_value,
-            STRING_AGG(DISTINCT r.text_value, '; ') as text_values
-     FROM responses r
-     WHERE r.project_id = $1 
-       AND r.assessment_type = 'selbstbewertung'
-       AND r.question_id IN (%s)
-       AND r.response_value IS NOT NULL 
-       AND r.response_value != ''
-     GROUP BY r.question_id
-     ORDER BY r.question_id", 
-        paste(sprintf("'%s'", qids), collapse = ",")
-      ), params = list(project_id))
+      message("Step 1: Getting template path")
+      template_path <- normalizePath(template_file, mustWork = TRUE)
       
-      # Get fremdbewertung (right side)
-      fremd_df <- DBI::dbGetQuery(con, sprintf(
-        "SELECT r.question_id, 
-            AVG(r.response_value::numeric) as avg_value,
-            STRING_AGG(DISTINCT r.text_value, '; ') as text_values
-     FROM responses r
-     WHERE r.project_id = $1 
-       AND r.assessment_type = 'fremdbewertung'
-       AND r.question_id IN (%s)
-       AND r.response_value IS NOT NULL 
-       AND r.response_value != ''
-     GROUP BY r.question_id
-     ORDER BY r.question_id", 
-        paste(sprintf("'%s'", qids), collapse = ",")
-      ), params = list(project_id))
+      message("Step 2: Changing to temp directory")
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd), add = TRUE)
       
-      # Create comparison table
-      df <- lapply(qids, function(qid) {
-        # Selbstbewertung
-        s_row <- selbst_df[selbst_df$question_id == qid, ]
-        s_val <- if(nrow(s_row) > 0) round(s_row$avg_value, 1) else NA
-        s_text <- if(nrow(s_row) > 0 && !is.na(s_row$text_values)) s_row$text_values else ""
-        
-        # Fremdbewertung
-        f_row <- fremd_df[fremd_df$question_id == qid, ]
-        f_val <- if(nrow(f_row) > 0) round(f_row$avg_value, 1) else NA
-        f_text <- if(nrow(f_row) > 0 && !is.na(f_row$text_values)) f_row$text_values else ""
-        
-        # Calculate difference
-        diff <- if (!is.na(s_val) && !is.na(f_val)) {
-          round(f_val - s_val, 1)
-        } else {
-          NA
+      message("Step 3: Copying template to temp dir")
+      file.copy(template_path, file.path(tmpdir, template_file), overwrite = TRUE)
+      
+      message("Step 4: Getting project ID")
+      project_id <- current_project_id()
+      if (is.null(project_id)) {
+        showNotification("Kein Projekt ausgewählt.", type = "error")
+        return(NULL)
+      }
+      message("  Project ID: ", project_id)
+      
+      message("Step 5: Gathering Fremdbewertung responses")
+      # Gather Fremdbewertung answers
+      gather_fremdbewertung_answers <- function() {
+        sections <- list(
+          fuehrung      = fuehrung_questions,
+          mitarbeitende = mit_questions,
+          patienten     = pat_questions,
+          einsender     = ein_questions,
+          qualitaet     = qual_questions
+        )
+        out <- list()
+        for (sec_name in names(sections)) {
+          questions <- sections[[sec_name]]
+          for (q in questions) {
+            num_ans <- input[[paste0("FremdbewertungNum_", q$id)]]
+            txt_ans <- input[[paste0("FremdbewertungText_", q$id)]]
+            out[[length(out) + 1]] <- data.frame(
+              Section     = sec_name,
+              question_id = q$id,
+              Frage       = q$label,
+              Antwort     = if (is.null(num_ans) || num_ans == "" || num_ans == "N/A") "—" else as.character(num_ans),
+              Begründung  = if (is.null(txt_ans) || txt_ans == "") "—" else as.character(txt_ans),
+              stringsAsFactors = FALSE
+            )
+          }
         }
-        
+        do.call(rbind, out)
+      }
+      
+      fremd_responses <- tryCatch({
+        gather_fremdbewertung_answers()
+      }, error = function(e) {
+        message("ERROR in gather_fremdbewertung_answers: ", e$message)
         data.frame(
-          Selbsteinschätzung = ifelse(is.na(s_val), "", as.character(s_val)),
-          Selbstbewertung = s_text,
-          Fremdeinschätzung = ifelse(is.na(f_val), "", as.character(f_val)),
-          Fremdbewertung = f_text,
-          Differenz = ifelse(is.na(diff), "", as.character(diff)),
+          Section = character(0),
+          question_id = character(0),
+          Frage = character(0),
+          Antwort = character(0),
+          Begründung = character(0),
           stringsAsFactors = FALSE
         )
       })
       
-      df_final <- do.call(rbind, df)
+      message("  Gathered ", nrow(fremd_responses), " fremdbewertung responses")
       
-      if (nrow(df_final) == 0) {
-        cat("\\textbf{Keine Daten vorhanden.}\n", file = file)
-      } else {
-        cat(knitr::kable(df_final, format="latex", booktabs=TRUE,
-                         col.names=c("Selbst-\\\\einschätzung", "Selbst-\\\\bewertung", 
-                                     "Fremd-\\\\einschätzung", "Fremd-\\\\bewertung", "Differenz")),
-            file=file)
+      message("Step 6: Gathering Selbstbewertung statistics, group data, and text responses")
+      
+      selbst_statistics <- tryCatch({
+        rbind(
+          get_question_level_statistics(project_id, fuehrung_questions, "fuehrung"),
+          get_question_level_statistics(project_id, mit_questions, "mitarbeitende"),
+          get_question_level_statistics(project_id, pat_questions, "patienten"),
+          get_question_level_statistics(project_id, ein_questions, "einsender"),
+          get_question_level_statistics(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in get_question_level_statistics: ", e$message)
+        data.frame(Section = character(0), question_id = character(0), 
+                   Frage = character(0), Statistik = character(0), stringsAsFactors = FALSE)
+      })
+      
+      selbst_groups <- tryCatch({
+        rbind(
+          get_berufsgruppe_averages(project_id, fuehrung_questions, "fuehrung"),
+          get_berufsgruppe_averages(project_id, mit_questions, "mitarbeitende"),
+          get_berufsgruppe_averages(project_id, pat_questions, "patienten"),
+          get_berufsgruppe_averages(project_id, ein_questions, "einsender"),
+          get_berufsgruppe_averages(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in get_berufsgruppe_averages: ", e$message)
+        data.frame(Section = character(0), question_id = character(0), 
+                   Frage = character(0), Berufsgruppen = character(0), stringsAsFactors = FALSE)
+      })
+      
+      selbst_texts <- tryCatch({
+        rbind(
+          get_selbstbewertung_text_responses(project_id, fuehrung_questions, "fuehrung"),
+          get_selbstbewertung_text_responses(project_id, mit_questions, "mitarbeitende"),
+          get_selbstbewertung_text_responses(project_id, pat_questions, "patienten"),
+          get_selbstbewertung_text_responses(project_id, ein_questions, "einsender"),
+          get_selbstbewertung_text_responses(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in get_selbstbewertung_text_responses: ", e$message)
+        data.frame(Section = character(0), question_id = character(0), 
+                   Frage = character(0), Textantworten = character(0), stringsAsFactors = FALSE)
+      })
+      
+      message("  Gathered ", nrow(selbst_statistics), " statistics rows")
+      message("  Gathered ", nrow(selbst_groups), " group rows")
+      message("  Gathered ", nrow(selbst_texts), " text rows")
+      
+      message("Step 7: Saving CSV files")
+      write.csv(fremd_responses, file = file.path(tmpdir, "user_fremdbewertung.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_statistics, file = file.path(tmpdir, "selbst_statistics.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_groups, file = file.path(tmpdir, "selbst_groups.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_texts, file = file.path(tmpdir, "selbst_texts.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      message("  CSV files saved")
+      
+      message("Step 7: Saving CSV files")
+      write.csv(fremd_responses, file = file.path(tmpdir, "user_fremdbewertung.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_statistics, file = file.path(tmpdir, "selbst_statistics.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_groups, file = file.path(tmpdir, "selbst_groups.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      message("  CSV files saved")
+      
+      message("Step 7.5: Checking CSV files exist")
+      fremd_csv_exists <- file.exists(file.path(tmpdir, "user_fremdbewertung.csv"))
+      selbst_stats_exists <- file.exists(file.path(tmpdir, "selbst_statistics.csv"))
+      selbst_groups_exists <- file.exists(file.path(tmpdir, "selbst_groups.csv"))
+      
+      message("  user_fremdbewertung.csv exists: ", fremd_csv_exists)
+      message("  selbst_statistics.csv exists: ", selbst_stats_exists)
+      message("  selbst_groups.csv exists: ", selbst_groups_exists)
+      
+      if (fremd_csv_exists) {
+        test_fremd <- read.csv(file.path(tmpdir, "user_fremdbewertung.csv"))
+        message("  Fremdbewertung rows: ", nrow(test_fremd))
+        message("  Fremdbewertung columns: ", paste(names(test_fremd), collapse = ", "))
       }
+      
+      if (selbst_stats_exists) {
+        test_stats <- read.csv(file.path(tmpdir, "selbst_statistics.csv"))
+        message("  Statistics rows: ", nrow(test_stats))
+        message("  Statistics columns: ", paste(names(test_stats), collapse = ", "))
+      }
+      
+      if (selbst_groups_exists) {
+        test_groups <- read.csv(file.path(tmpdir, "selbst_groups.csv"))
+        message("  Groups rows: ", nrow(test_groups))
+        message("  Groups columns: ", paste(names(test_groups), collapse = ", "))
+      }
+      message("Step 8: Rendering PDF")
+      
+      # Render PDF using rmarkdown
+      output_file <- rmarkdown::render(
+        input = file.path(tmpdir, template_file),
+        output_format = "pdf_document",
+        output_file = "fremdbewertung_report.pdf",
+        output_dir = tmpdir,
+        envir = new.env(parent = globalenv()),  # ✅ Changed this line
+        quiet = FALSE
+      )
+      
+      message("Step 9: Moving PDF to destination")
+      file.copy(output_file, file, overwrite = TRUE)
+      
+      message("=== Fremdbewertung Download completed successfully ===")
+      
+      showNotification(
+        "Fremdbewertung Bericht erfolgreich erstellt!",
+        type = "message",
+        duration = 5
+      )
+      
+    }, error = function(e) {
+      message("=== ERROR ===")
+      message(paste("  Message:", e$message))
+      message(paste("  Traceback:", paste(sys.calls(), collapse = "\n")))
+      
+      showNotification(
+        paste("Fehler beim Erstellen des Berichts:", e$message),
+        type = "error",
+        duration = 15
+      )
+      
+      writeLines(paste("Fehler:", e$message), file)
+    })
+  }
+)
+
+
+# Helper function to get fremdbewertung for a specific user
+get_fremdbewertung_for_user <- function(project_id, user_id) {
+  con <- get_db_con()
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+  
+  query <- "
+    SELECT 
+      r.question_id,
+      r.response_value as antwort,
+      r.text_value as begruendung
+    FROM responses r
+    WHERE r.project_id::text = $1::text
+      AND r.user_id::text = $2::text
+      AND r.assessment_type = 'fremdbewertung'
+    ORDER BY r.question_id
+  "
+  
+  result <- DBI::dbGetQuery(con, query, params = list(as.character(project_id), as.character(user_id)))
+  
+  if (nrow(result) == 0) {
+    return(data.frame(
+      Section = character(0),
+      question_id = character(0),
+      Frage = character(0),
+      Antwort = character(0),
+      Begründung = character(0),
+      stringsAsFactors = FALSE
+    ))
+  }
+  
+  # Add section and question labels
+  all_questions <- c(fuehrung_questions, mit_questions, pat_questions, ein_questions, qual_questions)
+  
+  result$Section <- sapply(result$question_id, function(qid) {
+    if (grepl("^F", qid)) "fuehrung"
+    else if (grepl("^M", qid)) "mitarbeitende"
+    else if (grepl("^P", qid)) "patienten"
+    else if (grepl("^E", qid)) "einsender"
+    else if (grepl("^Q", qid)) "qualitaet"
+    else NA
+  })
+  
+  result$Frage <- sapply(result$question_id, function(qid) {
+    q <- Find(function(x) x$id == qid, all_questions)
+    if (!is.null(q)) q$label else qid
+  })
+  
+  result <- result[, c("Section", "question_id", "Frage", "antwort", "begruendung")]
+  names(result) <- c("Section", "question_id", "Frage", "Antwort", "Begründung")
+  
+  return(result)
+}
+
+# Helper function to save report fields
+save_report_field <- function(field_name, field_value) {
+  con <- get_db_con()
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+  
+  project_id <- current_project_id()
+  user_id_val <- user_id()
+  
+  DBI::dbExecute(con, "
+    INSERT INTO report_data (project_id, user_id, field_name, field_value, updated_at)
+    VALUES ($1, $2, $3, $4, NOW())
+    ON CONFLICT (project_id, user_id, field_name)
+    DO UPDATE SET field_value = EXCLUDED.field_value, updated_at = NOW()
+  ", params = list(project_id, user_id_val, field_name, field_value))
+}
+
+# Helper function to load report fields
+load_report_field <- function(field_name) {
+  con <- get_db_con()
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+  
+  project_id <- current_project_id()
+  user_id_val <- user_id()
+  
+  result <- DBI::dbGetQuery(con, "
+    SELECT field_value FROM report_data
+    WHERE project_id = $1 AND user_id = $2 AND field_name = $3
+  ", params = list(project_id, user_id_val, field_name))
+  
+  if (nrow(result) > 0) result$field_value[1] else ""
+}
+
+# Save report data inputs to database
+observeEvent(input$report_teilnehmende, {
+  req(current_project_id())
+  save_report_field("teilnehmende", input$report_teilnehmende)
+})
+
+observeEvent(input$report_ort, {
+  req(current_project_id())
+  save_report_field("ort", input$report_ort)
+})
+
+observeEvent(input$report_datum, {
+  req(current_project_id())
+  save_report_field("datum", input$report_datum)
+})
+
+observeEvent(input$swot_strengths, {
+  req(current_project_id())
+  save_report_field("swot_strengths", input$swot_strengths)
+})
+
+observeEvent(input$swot_weaknesses, {
+  req(current_project_id())
+  save_report_field("swot_weaknesses", input$swot_weaknesses)
+})
+
+observeEvent(input$swot_opportunities, {
+  req(current_project_id())
+  save_report_field("swot_opportunities", input$swot_opportunities)
+})
+
+observeEvent(input$swot_threats, {
+  req(current_project_id())
+  save_report_field("swot_threats", input$swot_threats)
+})
+
+observeEvent(input$best_practices, {
+  req(current_project_id())
+  save_report_field("best_practices", input$best_practices)
+})
+
+observeEvent(input$final_remarks, {
+  req(current_project_id())
+  save_report_field("final_remarks", input$final_remarks)
+})
+
+# ------------------ gesamte bericht für Leading Peer -------------------------------------------
+output$downloadLeadingPeerGesamtbericht <- downloadHandler(
+  filename = function() {
+    project_name <- current_project_name()
+    if (is.null(project_name) || project_name == "") {
+      project_name <- "Peer_Review"
+    }
+    # Sanitize filename
+    project_name <- gsub("[^A-Za-z0-9_-]", "_", project_name)
+    paste0("Gesamtbericht_", project_name, "_", format(Sys.Date(), "%Y%m%d"), ".pdf")
+  },
+  
+  content = function(file) {
+    message("=== Gesamtbericht Download started ===")
+    
+    # Use .Rmd file directly (same directory as app)
+    template_file <- "gesamtbericht_template.Rmd"
+    
+    if (!file.exists(template_file)) {
+      showNotification("Template nicht gefunden.", type = "error", duration = 10)
+      writeLines("Template nicht verfügbar.", file)
+      return(NULL)
     }
     
-    # Führung
-    write_questions_table(fuehrung_questions, "fuehrung_questions_table.tex")
-    write_answers_table(con, project_id, fuehrung_questions, "fuehrung_answers_table.tex")
-    # Mitarbeitende
-    write_questions_table(mit_questions, "mitarbeitende_questions_table.tex")
-    write_answers_table(con, project_id, mit_questions, "mitarbeitende_answers_table.tex")
-    # Patienten
-    write_questions_table(pat_questions, "pat_questions_table.tex")
-    write_answers_table(con, project_id, pat_questions, "pat_answers_table.tex")
-    # Einsender
-    write_questions_table(ein_questions, "ein_questions_table.tex")
-    write_answers_table(con, project_id, ein_questions, "ein_answers_table.tex")
-    # Qualitätsindikatoren
-    write_questions_table(qual_questions, "qual_questions_table.tex")
-    write_answers_table(con, project_id, qual_questions, "qual_answers_table.tex")
-    
-    # Assign input for SWOT etc.
-    input_list <- as.list(labinfo[1, ])
-    input_list$project_title <- DBI::dbGetQuery(con, "SELECT title FROM projects WHERE id = $1", params = list(project_id))$title[1]
-    input_list$swot_strengths    <- input$swot_strengths
-    input_list$swot_weaknesses   <- input$swot_weaknesses
-    input_list$swot_opportunities<- input$swot_opportunities
-    input_list$swot_threats      <- input$swot_threats
-    input_list$best_practices    <- input$best_practices
-    input_list$final_remarks     <- input$final_remarks
-    
-    knit_env <- new.env()
-    assign("input", input_list, envir = knit_env)
-    out <- knitr::knit2pdf('gesamtbericht_report.Rnw', envir = knit_env, clean = TRUE)
-    file.rename(out, file)
+    tryCatch({
+      
+      message("Step 1: Getting template path")
+      template_path <- normalizePath(template_file, mustWork = TRUE)
+      message("  Template path: ", template_path)
+      
+      message("Step 2: Changing to temp directory")
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd), add = TRUE)
+      message("  Working in: ", tmpdir)
+      
+      message("Step 3: Copying template to temp dir")
+      file.copy(template_path, file.path(tmpdir, template_file), overwrite = TRUE)
+      
+      message("Step 4: Getting project ID and database connection")
+      project_id <- current_project_id()
+      if (is.null(project_id)) {
+        showNotification("Kein Projekt ausgewählt.", type = "error")
+        return(NULL)
+      }
+      message("  Project ID: ", project_id)
+      
+      con <- get_db_con()
+      on.exit(DBI::dbDisconnect(con), add = TRUE)
+      
+      # Step 4.5: Get lab info
+      message("Step 4.5: Getting lab info")
+      labinfo <- DBI::dbGetQuery(con, "
+        SELECT * FROM lab_info WHERE project_id = $1
+      ", params = list(as.character(project_id)))
+      
+      if (nrow(labinfo) == 0) {
+        # Create empty dataframe with all expected columns
+        labinfo <- data.frame(
+          lab_name = "", street = "", plz = "", city = "", country = "",
+          phone = "", email = "", website = "", lab_director = "", deputy = "",
+          num_employees = "", num_doctors = "", num_mtl = "",
+          accreditation = "", certification = "",
+          stringsAsFactors = FALSE
+        )
+      }
+      message("  Lab info rows: ", nrow(labinfo))
+      
+      # Step 5: Gather Selbstbewertung data
+      message("Step 5: Gathering Selbstbewertung data")
+      selbst_statistics <- tryCatch({
+        rbind(
+          get_question_level_statistics(project_id, fuehrung_questions, "fuehrung"),
+          get_question_level_statistics(project_id, mit_questions, "mitarbeitende"),
+          get_question_level_statistics(project_id, pat_questions, "patienten"),
+          get_question_level_statistics(project_id, ein_questions, "einsender"),
+          get_question_level_statistics(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in selbst_statistics: ", e$message)
+        data.frame(
+          Section = character(0),
+          question_id = character(0),
+          Frage = character(0),
+          Statistik = character(0),
+          stringsAsFactors = FALSE
+        )
+      })
+      
+      selbst_groups <- tryCatch({
+        rbind(
+          get_berufsgruppe_averages(project_id, fuehrung_questions, "fuehrung"),
+          get_berufsgruppe_averages(project_id, mit_questions, "mitarbeitende"),
+          get_berufsgruppe_averages(project_id, pat_questions, "patienten"),
+          get_berufsgruppe_averages(project_id, ein_questions, "einsender"),
+          get_berufsgruppe_averages(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in selbst_groups: ", e$message)
+        data.frame(
+          Section = character(0),
+          question_id = character(0),
+          Frage = character(0),
+          Berufsgruppen = character(0),
+          stringsAsFactors = FALSE
+        )
+      })
+      
+      selbst_texts <- tryCatch({
+        rbind(
+          get_selbstbewertung_text_responses(project_id, fuehrung_questions, "fuehrung"),
+          get_selbstbewertung_text_responses(project_id, mit_questions, "mitarbeitende"),
+          get_selbstbewertung_text_responses(project_id, pat_questions, "patienten"),
+          get_selbstbewertung_text_responses(project_id, ein_questions, "einsender"),
+          get_selbstbewertung_text_responses(project_id, qual_questions, "qualitaet")
+        )
+      }, error = function(e) {
+        message("ERROR in selbst_texts: ", e$message)
+        data.frame(
+          Section = character(0),
+          question_id = character(0),
+          Frage = character(0),
+          Textantworten = character(0),
+          stringsAsFactors = FALSE
+        )
+      })
+      
+      message("  Gathered ", nrow(selbst_statistics), " statistics rows")
+      message("  Gathered ", nrow(selbst_groups), " group rows")
+      message("  Gathered ", nrow(selbst_texts), " text rows")
+      
+      # Step 6: Gather ALL Fremdbewertung data (leading + co-peers)
+      message("Step 6: Gathering ALL Fremdbewertung data")
+      
+      # Get all peer users for this project
+      peer_users <- DBI::dbGetQuery(con, "
+        SELECT id, username, role 
+        FROM users 
+        WHERE project_id = $1 
+          AND role IN ('leading_peer', 'co_peer')
+        ORDER BY role DESC, username
+      ", params = list(as.character(project_id)))
+      
+      message("  Found ", nrow(peer_users), " peer reviewers")
+      
+      # Collect fremdbewertung from all peers
+      all_fremd_responses <- list()
+      
+      if (nrow(peer_users) > 0) {
+        for (i in 1:nrow(peer_users)) {
+          peer_user_id <- peer_users$id[i]
+          peer_username <- peer_users$username[i]
+          peer_role <- peer_users$role[i]
+          
+          message("  Loading fremdbewertung from: ", peer_username, " (", peer_role, ")")
+          
+          fremd_data <- get_fremdbewertung_for_user(project_id, peer_user_id)
+          
+          if (nrow(fremd_data) > 0) {
+            fremd_data$Reviewer <- peer_username
+            fremd_data$Reviewer_Role <- peer_role
+            all_fremd_responses[[i]] <- fremd_data
+          }
+        }
+      }
+      
+      if (length(all_fremd_responses) > 0) {
+        fremd_combined <- do.call(rbind, all_fremd_responses)
+      } else {
+        fremd_combined <- data.frame(
+          Section = character(0),
+          question_id = character(0),
+          Frage = character(0),
+          Antwort = character(0),
+          Begründung = character(0),
+          Reviewer = character(0),
+          Reviewer_Role = character(0),
+          stringsAsFactors = FALSE
+        )
+      }
+      
+      message("  Total fremdbewertung rows: ", nrow(fremd_combined))
+      
+      # Step 7: Load report metadata
+      message("Step 7: Loading report metadata")
+      
+      report_meta <- data.frame(
+        teilnehmende = load_report_field("teilnehmende"),
+        ort = load_report_field("ort"),
+        datum = load_report_field("datum"),
+        stringsAsFactors = FALSE
+      )
+      
+      swot_data <- data.frame(
+        strengths = load_report_field("swot_strengths"),
+        weaknesses = load_report_field("swot_weaknesses"),
+        opportunities = load_report_field("swot_opportunities"),
+        threats = load_report_field("swot_threats"),
+        stringsAsFactors = FALSE
+      )
+      
+      best_practices_text <- load_report_field("best_practices")
+      final_remarks_text <- load_report_field("final_remarks")
+      
+      message("  Loaded report metadata")
+      
+      # Step 8: Get co-peer list
+      message("Step 8: Getting co-peer list")
+      co_peers <- DBI::dbGetQuery(con, "
+        SELECT username, email, created_at
+        FROM users
+        WHERE project_id = $1 AND role = 'co_peer'
+        ORDER BY created_at
+      ", params = list(as.character(project_id)))
+      
+      message("  Found ", nrow(co_peers), " co-peers")
+      
+      # Step 9: Save all data as CSV
+      message("Step 9: Saving CSV files")
+      write.csv(labinfo, file = file.path(tmpdir, "labinfo.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_statistics, file = file.path(tmpdir, "selbst_statistics.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_groups, file = file.path(tmpdir, "selbst_groups.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(selbst_texts, file = file.path(tmpdir, "selbst_texts.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(fremd_combined, file = file.path(tmpdir, "fremd_all.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(report_meta, file = file.path(tmpdir, "report_meta.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(swot_data, file = file.path(tmpdir, "swot_data.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      write.csv(co_peers, file = file.path(tmpdir, "co_peers.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+      
+      writeLines(best_practices_text, file.path(tmpdir, "best_practices.txt"))
+      writeLines(final_remarks_text, file.path(tmpdir, "final_remarks.txt"))
+      
+      message("  CSV files saved")
+      
+      # Step 10: Render PDF
+      message("Step 10: Rendering PDF")
+      rmarkdown::render(
+        input = file.path(tmpdir, template_file),
+        output_file = file,
+        quiet = FALSE
+      )
+      
+      message("=== Gesamtbericht Download completed ===")
+      
+    }, error = function(e) {
+      message("ERROR in download handler: ", e$message)
+      showNotification(paste("Fehler beim Erstellen des PDFs:", e$message), type = "error", duration = 10)
+      writeLines(paste("Fehler:", e$message), file)
+    })
   }
 )
 
