@@ -4012,6 +4012,24 @@ server <- function(input, output, session) {
         )
       })
       
+      observe({
+        req(input$poweruser_fremd_project)
+        
+        input$poweruser_fremd_refresh
+        
+        reviewers <- DBI::dbGetQuery(con, "
+          SELECT DISTINCT u.username as reviewer
+          FROM responses r
+          JOIN users u ON u.id = r.user_id
+          WHERE r.project_id = $1
+            AND r.assessment_type = 'fremdbewertung'
+          ORDER BY u.username
+        ", params = list(as.integer(input$poweruser_fremd_project)))
+        
+        reviewer_choices <- c("Alle" = "", setNames(reviewers$reviewer, reviewers$reviewer))
+        updateSelectInput(session, "poweruser_fremd_filter_user", choices = reviewer_choices)
+      })
+      
       poweruser_fremdbewertung_data <- reactive({
         req(input$poweruser_fremd_project)
         
@@ -4033,37 +4051,20 @@ server <- function(input, output, session) {
         params <- list(as.integer(input$poweruser_fremd_project))
         
         if (!is.null(input$poweruser_fremd_filter_user) && input$poweruser_fremd_filter_user != "") {
-          query <- paste(query, "AND u.username = $2")
+          next_param <- length(params) + 1
+          query <- paste(query, paste0("AND u.username = $", next_param))
           params <- c(params, list(input$poweruser_fremd_filter_user))
         }
         
         if (!is.null(input$poweruser_fremd_filter_section) && input$poweruser_fremd_filter_section != "") {
-          if (length(params) == 1) {
-            query <- paste(query, "AND r.question_id LIKE $2")
-            params <- c(params, list(paste0(input$poweruser_fremd_filter_section, "%")))
-          } else {
-            query <- paste(query, "AND r.question_id LIKE $3")
-            params <- c(params, list(paste0(input$poweruser_fremd_filter_section, "%")))
-          }
+          next_param <- length(params) + 1
+          query <- paste(query, paste0("AND r.question_id LIKE $", next_param))
+          params <- c(params, list(paste0(input$poweruser_fremd_filter_section, "%")))
         }
         
         query <- paste(query, "ORDER BY u.username, r.question_id")
         
-        data <- DBI::dbGetQuery(con, query, params = params)
-        
-        reviewers <- DBI::dbGetQuery(con, "
-          SELECT DISTINCT u.username as reviewer
-          FROM responses r
-          JOIN users u ON u.id = r.user_id
-          WHERE r.project_id = $1
-            AND r.assessment_type = 'fremdbewertung'
-          ORDER BY u.username
-        ", params = list(as.integer(input$poweruser_fremd_project)))
-        
-        reviewer_choices <- c("Alle" = "", setNames(reviewers$reviewer, reviewers$reviewer))
-        updateSelectInput(session, "poweruser_fremd_filter_user", choices = reviewer_choices)
-        
-        data
+        DBI::dbGetQuery(con, query, params = params)
       })
       
       output$poweruser_fremdbewertung_table <- DT::renderDataTable({
