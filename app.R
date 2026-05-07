@@ -4081,7 +4081,12 @@ server <- function(input, output, session) {
       
       output$poweruser_download_fremdbewertung_csv <- downloadHandler(
         filename = function() {
-          paste0("Fremdbewertung_", input$poweruser_fremd_project, "_", Sys.Date(), ".csv")
+          project_title <- tryCatch({
+            get_all_projects() %>%
+              dplyr::filter(id == as.integer(input$poweruser_fremd_project)) %>%
+              dplyr::pull(title)
+          }, error = function(e) "Projekt")
+          paste0("Fremdbewertung_", gsub(" ", "_", project_title), "_", Sys.Date(), ".csv")
         },
         content = function(file) {
           write.csv(poweruser_fremdbewertung_data(), file, row.names = FALSE, fileEncoding = "UTF-8")
