@@ -1967,18 +1967,88 @@ ui <- dashboardPage(
             )
           ),
           
-          # ========== TAB 7: DEMO – FREMDBEWERTUNG ÜBERSICHT ==========
+          # ========== TAB 7: FREMDBEWERTUNG ÜBERSICHT ==========
           tabPanel(
             "Fremdbewertung",
             icon = icon("users"),
             
-            div(
-              class = "alert alert-warning",
-              icon("info-circle"),
-              "Nur Demo-Daten (nicht projektbezogen)."
-            ),
-            
-            uiOutput("poweruser_fremdbewertung_ui")
+            fluidRow(
+              column(12,
+                     h3(icon("user-check"), "Fremdbewertungen Übersicht"),
+                     p("Hier sehen Sie alle eingereichten Fremdbewertungen."),
+                     
+                     hr(),
+                     
+                     selectInput(
+                       "poweruser_fremd_project",
+                       "Projekt auswählen:",
+                       choices = NULL,
+                       width = "100%"
+                     ),
+                     
+                     hr(),
+                     
+                     uiOutput("poweruser_fremdbewertung_summary"),
+                     
+                     hr(),
+                     
+                     h4(icon("table"), "Eingereichte Fremdbewertungen"),
+                     
+                     fluidRow(
+                       column(
+                         4,
+                         selectInput(
+                           "poweruser_fremd_filter_user",
+                           "Filter: Reviewer",
+                           choices = NULL,
+                           width = "100%"
+                         )
+                       ),
+                       column(
+                         4,
+                         selectInput(
+                           "poweruser_fremd_filter_section",
+                           "Filter: Bereich",
+                           choices = c(
+                             "Alle" = "",
+                             "Führung" = "F",
+                             "Mitarbeitende" = "M",
+                             "Patienten" = "P",
+                             "Einsender" = "E",
+                             "Qualität" = "Q"
+                           ),
+                           width = "100%"
+                         )
+                       ),
+                       column(
+                         4,
+                         actionButton(
+                           "poweruser_fremd_refresh",
+                           "Aktualisieren",
+                           icon = icon("refresh"),
+                           class = "btn-primary",
+                           style = "margin-top: 25px; width: 100%;"
+                         )
+                       )
+                     ),
+                     
+                     br(),
+                     
+                     div(
+                       style = "background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+                       DT::dataTableOutput("poweruser_fremdbewertung_table")
+                     ),
+                     
+                     br(),
+                     
+                     downloadButton(
+                       "poweruser_download_fremdbewertung_csv",
+                       "Als CSV exportieren",
+                       class = "btn-success",
+                       icon = icon("download")
+                     )
+              )
+            )
           ),
           
           
@@ -3903,7 +3973,125 @@ server <- function(input, output, session) {
         updateSelectInput(session, "poweruser_filter_project", choices = choices_with_all)
         updateSelectInput(session, "poweruser_invite_project", choices = choices)
         updateSelectInput(session, "poweruser_report_project", choices = choices)
+        updateSelectInput(session, "poweruser_fremd_project", choices = choices)
       })
+      
+      # ========== FREMDBEWERTUNG OVERVIEW ==========
+      
+      output$poweruser_fremdbewertung_summary <- renderUI({
+        req(input$poweruser_fremd_project)
+        
+        stats <- DBI::dbGetQuery(con, "
+          SELECT
+            COUNT(DISTINCT r.user_id) as total_reviewers,
+            COUNT(*) as total_responses
+          FROM responses r
+          WHERE r.project_id = $1
+            AND r.assessment_type = 'fremdbewertung'
+        ", params = list(as.integer(input$poweruser_fremd_project)))
+        
+        fluidRow(
+          column(
+            6,
+            div(
+              class = "info-box bg-aqua",
+              style = "padding: 15px; border-radius: 5px; color: white; background: #00c0ef;",
+              div(style = "font-size: 14px; font-weight: 600;", "Anzahl Reviewer"),
+              div(style = "font-size: 32px; font-weight: bold; margin-top: 5px;", stats$total_reviewers)
+            )
+          ),
+          column(
+            6,
+            div(
+              class = "info-box bg-yellow",
+              style = "padding: 15px; border-radius: 5px; color: white; background: #f39c12;",
+              div(style = "font-size: 14px; font-weight: 600;", "Gesamte Antworten"),
+              div(style = "font-size: 32px; font-weight: bold; margin-top: 5px;", stats$total_responses)
+            )
+          )
+        )
+      })
+      
+      observe({
+        req(input$poweruser_fremd_project)
+        
+        input$poweruser_fremd_refresh
+        
+        reviewers <- DBI::dbGetQuery(con, "
+          SELECT DISTINCT u.username as reviewer
+          FROM responses r
+          JOIN users u ON u.id = r.user_id
+          WHERE r.project_id = $1
+            AND r.assessment_type = 'fremdbewertung'
+          ORDER BY u.username
+        ", params = list(as.integer(input$poweruser_fremd_project)))
+        
+        reviewer_choices <- c("Alle" = "", setNames(reviewers$reviewer, reviewers$reviewer))
+        updateSelectInput(session, "poweruser_fremd_filter_user", choices = reviewer_choices)
+      })
+      
+      poweruser_fremdbewertung_data <- reactive({
+        req(input$poweruser_fremd_project)
+        
+        input$poweruser_fremd_refresh
+        
+        query <- "
+          SELECT 
+            u.username as reviewer,
+            r.question_id,
+            r.response_value,
+            r.assessment_type,
+            TO_CHAR(r.submitted_at AT TIME ZONE 'Europe/Berlin', 'DD.MM.YYYY HH24:MI') as submitted_at
+          FROM responses r
+          JOIN users u ON u.id = r.user_id
+          WHERE r.project_id = $1
+            AND r.assessment_type = 'fremdbewertung'
+        "
+        
+        params <- list(as.integer(input$poweruser_fremd_project))
+        
+        if (!is.null(input$poweruser_fremd_filter_user) && input$poweruser_fremd_filter_user != "") {
+          next_param <- length(params) + 1
+          query <- paste(query, paste0("AND u.username = $", next_param))
+          params <- c(params, list(input$poweruser_fremd_filter_user))
+        }
+        
+        if (!is.null(input$poweruser_fremd_filter_section) && input$poweruser_fremd_filter_section != "") {
+          next_param <- length(params) + 1
+          query <- paste(query, paste0("AND r.question_id LIKE $", next_param))
+          params <- c(params, list(paste0(input$poweruser_fremd_filter_section, "%")))
+        }
+        
+        query <- paste(query, "ORDER BY u.username, r.question_id")
+        
+        DBI::dbGetQuery(con, query, params = params)
+      })
+      
+      output$poweruser_fremdbewertung_table <- DT::renderDataTable({
+        DT::datatable(
+          poweruser_fremdbewertung_data(),
+          options = list(
+            pageLength = 25,
+            scrollX = TRUE
+          ),
+          rownames = FALSE,
+          class = "cell-border stripe compact"
+        )
+      })
+      
+      output$poweruser_download_fremdbewertung_csv <- downloadHandler(
+        filename = function() {
+          project_title <- tryCatch({
+            get_all_projects() %>%
+              dplyr::filter(id == as.integer(input$poweruser_fremd_project)) %>%
+              dplyr::pull(title)
+          }, error = function(e) "Projekt")
+          paste0("Fremdbewertung_", gsub(" ", "_", project_title), "_", Sys.Date(), ".csv")
+        },
+        content = function(file) {
+          write.csv(poweruser_fremdbewertung_data(), file, row.names = FALSE, fileEncoding = "UTF-8")
+        }
+      )
       
       # ========== TABLES ==========
       
@@ -4249,6 +4437,27 @@ server <- function(input, output, session) {
         },
         content = function(file) {
           generate_labinfo_pdf(file, input$poweruser_report_project)
+        }
+      )
+      
+      output$poweruser_download_comparison <- downloadHandler(
+        filename = function() {
+          project_id <- input$poweruser_report_project
+          project_title <- tryCatch({
+            get_all_projects() %>%
+              dplyr::filter(id == as.integer(project_id)) %>%
+              dplyr::pull(title)
+          }, error = function(e) "Projekt")
+          paste0("Vergleichstabelle_", gsub(" ", "_", project_title), "_", Sys.Date(), ".pdf")
+        },
+        content = function(file) {
+          req(input$poweruser_report_project)
+          project_id <- input$poweruser_report_project
+          if (is.null(project_id) || project_id == "") {
+            showNotification("Kein Projekt ausgewählt!", type = "error", duration = 5)
+            return(NULL)
+          }
+          generate_comparison_pdf(file, project_id, user_role())
         }
       )
       
